@@ -6,7 +6,7 @@ LIBS=../deps/target/lib/libev.a ../deps/target/lib/libstatgrab.a
 CFLAGS=-I ../deps/target/include
 
 ifeq ($(uname_S),Linux)
-	LIBS+= -lpthread
+	LIBS+= -lpthread -lm
 endif
 ifeq ($(uname_S),Darwin)
 	LIBS+= -framework CoreFoundation -framework IOKit
