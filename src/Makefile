@@ -1,15 +1,21 @@
-CFLAGS  = -I ../deps/target/include
-LDFLAGS = -framework CoreFoundation -framework IOKit
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
-LIBS = ../deps/target/lib/libev.a ../deps/target/lib/libstatgrab.a
-OBJS = qnd.o context.o cmd.o callback.o
+PROGRAM=qnd
+OBJS=qnd.o context.o cmd.o callback.o
+LIBS=../deps/target/lib/libev.a ../deps/target/lib/libstatgrab.a
+CFLAGS=-I ../deps/target/include
 
-PROGRAM = qnd
+ifeq ($(uname_S),Linux)
+	LIBS+= -lpthread
+endif
+ifeq ($(uname_S),Darwin)
+	LIBS+= -framework CoreFoundation -framework IOKit
+endif
 
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
-	$(CC) $(OBJS) $(LIBS) -o $@ $(LDFLAGS)
+	$(CC) $(OBJS) $(LIBS) -o $@
 
 clean:
 	@rm -rf $(OBJS) $(PROGRAM)
