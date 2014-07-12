@@ -3,11 +3,11 @@ uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 PREFIX = `pwd`/../target
 
 ifeq ($(uname_S),SunOS)
-	LIBTYPE=shared
 	LIBSUFFIX=so
+	CFGFLAGS=--enable-shared --disable-static
 else # Linux, Darwin
-	LIBTYPE=static
 	LIBSUFFIX=a
+	CFGFLAGS=--enable-static --disable-shared
 endif
 
 SGVER=0.90
@@ -25,7 +25,7 @@ $(LIBSTATGRAB):
 	@printf '[%b]\n' $(MAKECOLOR)libstatgrab$(ENDCOLOR)
 	@wget -q -O libstatgrab-$(SGVER).tar.gz http://ftp.i-scream.org/pub/i-scream/libstatgrab/libstatgrab-$(SGVER).tar.gz
 	@tar -xpf libstatgrab-$(SGVER).tar.gz
-	@cd libstatgrab-$(SGVER) && ./configure --prefix=$(PREFIX) --enable-$(LIBTYPE)
+	@cd libstatgrab-$(SGVER) && ./configure --prefix=$(PREFIX) --disable-tests $(CFGFLAGS)
 	@cd libstatgrab-$(SGVER) && make && make install
 	@echo
 
@@ -33,7 +33,7 @@ $(LIBEV):
 	@printf '[%b]\n' $(MAKECOLOR)libev$(ENDCOLOR)
 	@wget -q -O libev-$(EVVER).tar.gz http://dist.schmorp.de/libev/libev-$(EVVER).tar.gz
 	@tar -xpf libev-$(EVVER).tar.gz
-	@cd libev-$(EVVER) && ./configure --prefix=$(PREFIX) --enable-$(LIBTYPE)
+	@cd libev-$(EVVER) && ./configure --prefix=$(PREFIX) $(CFGFLAGS)
 	@cd libev-$(EVVER) && make && make install
 	@echo
 
