@@ -43,7 +43,4 @@ int qnd_context_listen(qnd_context *ctx, int port)
 void qnd_context_cleanup(qnd_context *ctx)
 {
   sg_shutdown();
-
-  free(ctx->buffer);
-  free(ctx);
 }

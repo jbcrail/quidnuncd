@@ -1,6 +1,6 @@
 #include "qnd.h"
 
-extern qnd_context *ctx;
+extern qnd_context ctx;
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
@@ -34,9 +34,9 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  read = recv(watcher->fd, ctx->buffer, DEFAULT_BUFFER_SIZE, 0);
-  char ch = ctx->buffer[0];
-  bzero(ctx->buffer, read);
+  read = recv(watcher->fd, ctx.buffer, DEFAULT_BUFFER_SIZE, 0);
+  char ch = ctx.buffer[0];
+  bzero(ctx.buffer, read);
 
   if (read < 0) {
     perror("read error");
@@ -55,23 +55,23 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   switch (ch) {
     case 'P':
       printf("PING\n");
-      qnd_cmd_ping(ctx, watcher);
-      send(watcher->fd, ctx->buffer, strlen(ctx->buffer)+1, 0);
-      bzero(ctx->buffer, strlen(ctx->buffer));
+      qnd_cmd_ping(&ctx, watcher);
+      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
+      bzero(ctx.buffer, strlen(ctx.buffer));
       break;
 
     case 'T':
       printf("TIME\n");
-      qnd_cmd_time(ctx, watcher);
-      send(watcher->fd, ctx->buffer, strlen(ctx->buffer)+1, 0);
-      bzero(ctx->buffer, strlen(ctx->buffer));
+      qnd_cmd_time(&ctx, watcher);
+      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
+      bzero(ctx.buffer, strlen(ctx.buffer));
       break;
 
     case 'I':
       printf("INFO\n");
-      qnd_cmd_info(ctx, watcher);
-      send(watcher->fd, ctx->buffer, strlen(ctx->buffer)+1, 0);
-      bzero(ctx->buffer, strlen(ctx->buffer));
+      qnd_cmd_info(&ctx, watcher);
+      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
+      bzero(ctx.buffer, strlen(ctx.buffer));
       break;
 
     default:
