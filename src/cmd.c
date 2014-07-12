@@ -10,7 +10,7 @@ void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher)
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
-  sprintf(ctx->buffer, "*2\r\n:%ld\r\n:%d\r\n", tv.tv_sec, tv.tv_usec);
+  sprintf(ctx->buffer, "*2\r\n:%ju\r\n:%ju\r\n", (uintmax_t)tv.tv_sec, (uintmax_t)tv.tv_usec);
 }
 
 void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher)
@@ -31,8 +31,8 @@ void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher)
     ctx->host_stats->os_release,
     ctx->host_stats->platform,
     ctx->host_stats->hostname,
-    (long long)ctx->host_stats->uptime,
-    (long long)ctx->host_stats->uptime/60/60/24,
+    (uint64_t)ctx->host_stats->uptime,
+    (uint64_t)ctx->host_stats->uptime/60/60/24,
     ctx->host_stats->maxcpus,
     ctx->host_stats->ncpus,
     ctx->host_stats->bitwidth);
