@@ -1,24 +1,40 @@
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
 PREFIX = `pwd`/../target
 
-all: target/lib/libstatgrab.a target/lib/libev.a
+ifeq ($(uname_S),SunOS)
+	LIBTYPE=shared
+	LIBSUFFIX=so
+else # Linux, Darwin
+	LIBTYPE=static
+	LIBSUFFIX=a
+endif
+
+SGVER=0.90
+EVVER=4.15
+
+LIBEV=target/lib/libev.$(LIBSUFFIX)
+LIBSTATGRAB=target/lib/libstatgrab.$(LIBSUFFIX)
+
+all: $(LIBSTATGRAB) $(LIBEV)
 
 MAKECOLOR="\033[32;1m"
 ENDCOLOR="\033[0m"
 
-target/lib/libstatgrab.a:
+$(LIBSTATGRAB):
 	@printf '[%b]\n' $(MAKECOLOR)libstatgrab$(ENDCOLOR)
-	@wget -q -O libstatgrab-0.90.tar.gz http://ftp.i-scream.org/pub/i-scream/libstatgrab/libstatgrab-0.90.tar.gz
-	@tar -xpf libstatgrab-0.90.tar.gz
-	@cd libstatgrab-0.90 && ./configure --prefix=$(PREFIX) --enable-static
-	@cd libstatgrab-0.90 && make && make install
+	@wget -q -O libstatgrab-$(SGVER).tar.gz http://ftp.i-scream.org/pub/i-scream/libstatgrab/libstatgrab-$(SGVER).tar.gz
+	@tar -xpf libstatgrab-$(SGVER).tar.gz
+	@cd libstatgrab-$(SGVER) && ./configure --prefix=$(PREFIX) --enable-$(LIBTYPE)
+	@cd libstatgrab-$(SGVER) && make && make install
 	@echo
 
-target/lib/libev.a:
+$(LIBEV):
 	@printf '[%b]\n' $(MAKECOLOR)libev$(ENDCOLOR)
-	@wget -q -O libev-4.15.tar.gz http://dist.schmorp.de/libev/libev-4.15.tar.gz
-	@tar -xpf libev-4.15.tar.gz
-	@cd libev-4.15 && ./configure --prefix=$(PREFIX) --enable-static
-	@cd libev-4.15 && make && make install
+	@wget -q -O libev-$(EVVER).tar.gz http://dist.schmorp.de/libev/libev-$(EVVER).tar.gz
+	@tar -xpf libev-$(EVVER).tar.gz
+	@cd libev-$(EVVER) && ./configure --prefix=$(PREFIX) --enable-$(LIBTYPE)
+	@cd libev-$(EVVER) && make && make install
 	@echo
 
 clean:
