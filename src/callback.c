@@ -78,3 +78,8 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
       break;
   }
 }
+
+void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)
+{
+  ev_break(loop, EVBREAK_ALL);
+}
