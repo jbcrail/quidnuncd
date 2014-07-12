@@ -1,13 +1,11 @@
 #include "qnd.h"
 
-void
-qnd_cmd_ping(struct qnd_context *ctx, struct ev_io *watcher)
+void qnd_cmd_ping(qnd_context *ctx, struct ev_io *watcher)
 {
   sprintf(ctx->buffer, "+PONG\r\n");
 }
 
-void
-qnd_cmd_time(struct qnd_context *ctx, struct ev_io *watcher)
+void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher)
 {
   struct timeval tv;
 
@@ -15,8 +13,7 @@ qnd_cmd_time(struct qnd_context *ctx, struct ev_io *watcher)
   sprintf(ctx->buffer, "*2\r\n:%ld\r\n:%d\r\n", tv.tv_sec, tv.tv_usec);
 }
 
-void
-qnd_cmd_info(struct qnd_context *ctx, struct ev_io *watcher)
+void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher)
 {
   char *format = "*9\r\n"
                  "$0\r\nos_name:%s\r\n"

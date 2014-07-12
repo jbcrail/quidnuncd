@@ -12,22 +12,30 @@
 #include "ev.h"
 #include "statgrab.h"
 
-#define PORT        3230
-#define BUFFER_SIZE 1024
+#define DEFAULT_PORT        3230
+#define DEFAULT_BUFFER_SIZE 1024
 
-struct qnd_context {
-  sg_host_info *host_stats;
-  char *buffer;
-};
+typedef struct {
+  /* Networking */
+  int port;                         /* TCP listening port */
+  int sd;                           /* TCP socket file descriptor */
 
-struct qnd_context* qnd_context_init();
-void                qnd_context_free(struct qnd_context *ctx);
+  /* Statistics */
+  sg_host_info *host_stats;         /* Host statistics */
 
-void                qnd_cmd_ping(struct qnd_context *ctx, struct ev_io *watcher);
-void                qnd_cmd_time(struct qnd_context *ctx, struct ev_io *watcher);
-void                qnd_cmd_info(struct qnd_context *ctx, struct ev_io *watcher);
+  /* Miscellaneous */
+  char buffer[DEFAULT_BUFFER_SIZE]; /* Scratchpad for incoming requests */
+} qnd_context;
 
-void                accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
-void                read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+int qnd_context_init(qnd_context *ctx);
+int qnd_context_listen(qnd_context *ctx, int port);
+void qnd_context_cleanup(qnd_context *ctx);
+
+void qnd_cmd_ping(qnd_context *ctx, struct ev_io *watcher);
+void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher);
+void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher);
+
+void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 
 #endif

@@ -1,6 +1,6 @@
 #include "qnd.h"
 
-extern struct qnd_context *ctx;
+extern qnd_context *ctx;
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
@@ -34,7 +34,7 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  read = recv(watcher->fd, ctx->buffer, BUFFER_SIZE, 0);
+  read = recv(watcher->fd, ctx->buffer, DEFAULT_BUFFER_SIZE, 0);
   char ch = ctx->buffer[0];
   bzero(ctx->buffer, read);
 
