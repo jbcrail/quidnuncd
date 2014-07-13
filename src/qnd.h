@@ -2,6 +2,7 @@
 #define __QND_H__
 
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,7 @@
 #include "statgrab.h"
 
 #define DEFAULT_PORT        3230
-#define DEFAULT_BUFFER_SIZE 1024
+#define DEFAULT_BUFFER_SIZE 16*1024
 
 typedef struct {
   /* Networking */
@@ -29,10 +30,12 @@ typedef struct {
   /* Miscellaneous */
   char rbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for incoming requests */
   char wbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for outgoing requests */
+  size_t wbuf_idx;                  /* Current insertion point for write buffer */
 } qnd_context;
 
 int qnd_context_init(qnd_context *ctx);
 int qnd_context_listen(qnd_context *ctx, int port);
+int qnd_context_write(qnd_context *ctx, const char *fmt, ...);
 void qnd_context_cleanup(qnd_context *ctx);
 
 void qnd_cmd_ping(qnd_context *ctx, struct ev_io *watcher);

@@ -50,26 +50,27 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
+  // Parse requests based on first character for now
   switch (ctx.rbuf[0]) {
     case 'P':
-      printf("PING\n");
       qnd_cmd_ping(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
-      bzero(ctx.wbuf, strlen(ctx.wbuf));
+      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
+      bzero(ctx.wbuf, ctx.wbuf_idx);
+      ctx.wbuf_idx = 0;
       break;
 
     case 'T':
-      printf("TIME\n");
       qnd_cmd_time(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
-      bzero(ctx.wbuf, strlen(ctx.wbuf));
+      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
+      bzero(ctx.wbuf, ctx.wbuf_idx);
+      ctx.wbuf_idx = 0;
       break;
 
     case 'I':
-      printf("INFO\n");
       qnd_cmd_info(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
-      bzero(ctx.wbuf, strlen(ctx.wbuf));
+      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
+      bzero(ctx.wbuf, ctx.wbuf_idx);
+      ctx.wbuf_idx = 0;
       break;
 
     default:
