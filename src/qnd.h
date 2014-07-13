@@ -25,7 +25,11 @@ typedef struct {
   int sd;                           /* TCP socket file descriptor */
 
   /* Statistics */
+  size_t fs_size;
+  sg_fs_stats *fs_stats;            /* Filesystem statistics */
   sg_host_info *host_stats;         /* Host statistics */
+  sg_load_stats *load_stats;        /* Load statistics */
+  sg_mem_stats *mem_stats;          /* Memory statistics */
 
   /* Miscellaneous */
   char rbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for incoming requests */

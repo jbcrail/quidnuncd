@@ -9,10 +9,6 @@ int qnd_context_init(qnd_context *ctx)
   if (sg_drop_privileges() != SG_ERROR_NONE)
     exit(1);
 
-  ctx->host_stats = sg_get_host_info(NULL);
-  if (ctx->host_stats == NULL)
-    exit(1);
-
   return 0;
 }
 
