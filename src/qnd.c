@@ -21,6 +21,8 @@ int main(int argc, char **argv)
 
   ev_loop(loop, 0);
 
+  ev_signal_stop(loop, &signal_watcher);
+  ev_io_stop(loop, &w_accept);
   qnd_context_cleanup(&ctx);
 
   return 0;
