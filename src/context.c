@@ -2,6 +2,9 @@
 
 int qnd_context_init(qnd_context *ctx)
 {
+  signal(SIGHUP, SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);
+
   sg_init(1);
   if (sg_drop_privileges() != SG_ERROR_NONE)
     exit(1);
