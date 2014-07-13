@@ -34,9 +34,7 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  read = recv(watcher->fd, ctx.buffer, DEFAULT_BUFFER_SIZE, 0);
-  char ch = ctx.buffer[0];
-  bzero(ctx.buffer, read);
+  read = recv(watcher->fd, ctx.rbuf, DEFAULT_BUFFER_SIZE, 0);
 
   if (read < 0) {
     perror("read error");
@@ -52,31 +50,33 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  switch (ch) {
+  switch (ctx.rbuf[0]) {
     case 'P':
       printf("PING\n");
       qnd_cmd_ping(&ctx, watcher);
-      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
-      bzero(ctx.buffer, strlen(ctx.buffer));
+      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
+      bzero(ctx.wbuf, strlen(ctx.wbuf));
       break;
 
     case 'T':
       printf("TIME\n");
       qnd_cmd_time(&ctx, watcher);
-      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
-      bzero(ctx.buffer, strlen(ctx.buffer));
+      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
+      bzero(ctx.wbuf, strlen(ctx.wbuf));
       break;
 
     case 'I':
       printf("INFO\n");
       qnd_cmd_info(&ctx, watcher);
-      send(watcher->fd, ctx.buffer, strlen(ctx.buffer)+1, 0);
-      bzero(ctx.buffer, strlen(ctx.buffer));
+      send(watcher->fd, ctx.wbuf, strlen(ctx.wbuf)+1, 0);
+      bzero(ctx.wbuf, strlen(ctx.wbuf));
       break;
 
     default:
       break;
   }
+
+  bzero(ctx.rbuf, read);
 }
 
 void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)

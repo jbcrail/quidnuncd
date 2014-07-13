@@ -27,7 +27,8 @@ typedef struct {
   sg_host_info *host_stats;         /* Host statistics */
 
   /* Miscellaneous */
-  char buffer[DEFAULT_BUFFER_SIZE]; /* Scratchpad for incoming requests */
+  char rbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for incoming requests */
+  char wbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for outgoing requests */
 } qnd_context;
 
 int qnd_context_init(qnd_context *ctx);

@@ -2,7 +2,7 @@
 
 void qnd_cmd_ping(qnd_context *ctx, struct ev_io *watcher)
 {
-  sprintf(ctx->buffer, "+PONG\r\n");
+  sprintf(ctx->wbuf, "+PONG\r\n");
 }
 
 void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher)
@@ -10,7 +10,7 @@ void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher)
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
-  sprintf(ctx->buffer, "*2\r\n:%ju\r\n:%ju\r\n", (uintmax_t)tv.tv_sec, (uintmax_t)tv.tv_usec);
+  sprintf(ctx->wbuf, "*2\r\n:%ju\r\n:%ju\r\n", (uintmax_t)tv.tv_sec, (uintmax_t)tv.tv_usec);
 }
 
 void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher)
@@ -26,7 +26,7 @@ void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher)
                  "$0\r\ncpus_available:%u\r\n"
                  "$0\r\narch_bits:%u\r\n";
 
-  sprintf(ctx->buffer, format,
+  sprintf(ctx->wbuf, format,
     ctx->host_stats->os_name,
     ctx->host_stats->os_release,
     ctx->host_stats->platform,
