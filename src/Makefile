@@ -11,6 +11,9 @@ endif
 ifeq ($(uname_S),Darwin)
 	LIBS+= -framework CoreFoundation -framework IOKit
 endif
+ifeq ($(uname_S),SunOS)
+	LIBS+= -lnsl -lsocket -lev -lstatgrab -L ../deps/target/lib
+endif
 
 all: $(PROGRAM)
 
