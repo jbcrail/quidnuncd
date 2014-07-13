@@ -3,11 +3,6 @@
 /* Global context for server */
 qnd_context ctx;
 
-static void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)
-{
-  ev_break(loop, EVBREAK_ALL);
-}
-
 int main(int argc, char **argv)
 {
   struct ev_signal signal_watcher;

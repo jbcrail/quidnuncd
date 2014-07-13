@@ -40,5 +40,6 @@ void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher);
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
 
 #endif
