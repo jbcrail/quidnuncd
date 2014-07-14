@@ -39,25 +39,6 @@ int qnd_context_listen(qnd_context *ctx, int port)
   return 0;
 }
 
-// Helper function to simplify writing reply to a client
-int qnd_context_write(qnd_context *ctx, const char *fmt, ...)
-{
-  int rc;
-  size_t size = sizeof(ctx->wbuf) - ctx->wbuf_idx;
-  va_list args;
-
-  if (size <= 0) {
-    return -1;
-  }
-
-  va_start(args, fmt);
-  rc = vsnprintf(ctx->wbuf+ctx->wbuf_idx, size, fmt, args);
-  ctx->wbuf_idx += rc;
-  va_end(args);
-
-  return (rc >= size) ? -1 : rc;
-}
-
 void qnd_context_cleanup(qnd_context *ctx)
 {
   sg_shutdown();

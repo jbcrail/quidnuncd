@@ -27,57 +27,74 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-  ssize_t read;
-
   if (EV_ERROR & revents) {
     perror("invalid event");
     return;
   }
 
-  read = recv(watcher->fd, ctx.rbuf, DEFAULT_BUFFER_SIZE, 0);
+  ctx.rbuf_idx = recv(watcher->fd, ctx.rbuf, DEFAULT_BUFFER_SIZE, 0);
 
-  if (read < 0) {
+  if (ctx.rbuf_idx < 0) {
     perror("read error");
-    return;
+    goto cleanup;
   }
 
-  if (read == 0) {
+  if (ctx.rbuf_idx == 0) {
     ev_io_stop(loop,watcher);
     close(watcher->fd);
     free(watcher);
 
     perror("remote connection is closing");
-    return;
+    goto cleanup;
   }
 
+  char *pos = strstr(ctx.rbuf, "\r\n");
+  if (pos == NULL) return;
+
+  sds request = sdscpylen(sdsempty(), ctx.rbuf, pos-ctx.rbuf+2);
+  sds response = sdsempty();
+
+  sdstolower(request);
+
   // Parse requests based on first character for now
-  switch (ctx.rbuf[0]) {
-    case 'P':
-      qnd_cmd_ping(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
-      bzero(ctx.wbuf, ctx.wbuf_idx);
-      ctx.wbuf_idx = 0;
+  switch (request[0]) {
+    case 'p':
+      response = ping_handler(&ctx, request, response);
       break;
 
-    case 'T':
-      qnd_cmd_time(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
-      bzero(ctx.wbuf, ctx.wbuf_idx);
-      ctx.wbuf_idx = 0;
+    case 't':
+      response = time_handler(&ctx, request, response);
       break;
 
-    case 'I':
-      qnd_cmd_info(&ctx, watcher);
-      send(watcher->fd, ctx.wbuf, ctx.wbuf_idx+1, 0);
-      bzero(ctx.wbuf, ctx.wbuf_idx);
-      ctx.wbuf_idx = 0;
+    case 'i':
+      response = info_handler(&ctx, request, response);
       break;
 
     default:
       break;
   }
 
-  bzero(ctx.rbuf, read);
+  if (sdslen(response) > 0) {
+    ssize_t bytes = send(watcher->fd, response, sdslen(response), 0);
+    if (bytes < 0) {
+      perror("send error");
+    }
+  }
+
+  sdsfree(response);
+  sdsfree(request);
+
+cleanup:
+  bzero(ctx.rbuf, ctx.rbuf_idx);
+  ctx.rbuf_idx = 0;
+}
+
+void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
+{
+  if (EV_ERROR & revents) {
+    perror("invalid event");
+    return;
+  }
 }
 
 void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)

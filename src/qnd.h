@@ -1,6 +1,8 @@
 #ifndef __QND_H__
 #define __QND_H__
 
+#include <ctype.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -14,6 +16,7 @@
 #include <sys/types.h>
 
 #include "ev.h"
+#include "sds.h"
 #include "statgrab.h"
 
 #define DEFAULT_PORT        3230
@@ -33,21 +36,23 @@ typedef struct {
 
   /* Miscellaneous */
   char rbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for incoming requests */
+  ssize_t rbuf_idx;                 /* Current insertion point for read buffer */
+
   char wbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for outgoing requests */
-  size_t wbuf_idx;                  /* Current insertion point for write buffer */
+  ssize_t wbuf_idx;                 /* Current insertion point for write buffer */
 } qnd_context;
 
 int qnd_context_init(qnd_context *ctx);
 int qnd_context_listen(qnd_context *ctx, int port);
-int qnd_context_write(qnd_context *ctx, const char *fmt, ...);
 void qnd_context_cleanup(qnd_context *ctx);
-
-void qnd_cmd_ping(qnd_context *ctx, struct ev_io *watcher);
-void qnd_cmd_time(qnd_context *ctx, struct ev_io *watcher);
-void qnd_cmd_info(qnd_context *ctx, struct ev_io *watcher);
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
+
+sds ping_handler(qnd_context *ctx, sds request, sds response);
+sds time_handler(qnd_context *ctx, sds request, sds response);
+sds info_handler(qnd_context *ctx, sds request, sds response);
 
 #endif
