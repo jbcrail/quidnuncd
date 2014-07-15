@@ -18,11 +18,12 @@
 #include "ev.h"
 #include "sds.h"
 #include "statgrab.h"
+#include "uthash.h"
 
 #define DEFAULT_PORT        3230
 #define DEFAULT_BUFFER_SIZE 16*1024
 
-typedef struct {
+struct qn_server {
   /* Networking */
   int port;                         /* TCP listening port */
   int sd;                           /* TCP socket file descriptor */
@@ -35,24 +36,38 @@ typedef struct {
   sg_mem_stats *mem_stats;          /* Memory statistics */
 
   /* Miscellaneous */
-  char rbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for incoming requests */
-  ssize_t rbuf_idx;                 /* Current insertion point for read buffer */
+  struct qn_client *clients;
+};
 
-  char wbuf[DEFAULT_BUFFER_SIZE];   /* Scratchpad for outgoing requests */
-  ssize_t wbuf_idx;                 /* Current insertion point for write buffer */
-} qnd_context;
+struct qn_client {
+  int fd;
+  sds rbuf;
+  sds wbuf;
+  sds request;
+  sds response;
+  struct qn_server *srv;
+  UT_hash_handle hh;
+};
 
-int qnd_context_init(qnd_context *ctx);
-int qnd_context_listen(qnd_context *ctx, int port);
-void qnd_context_cleanup(qnd_context *ctx);
+int qn_server_init(struct qn_server *svr);
+int qn_server_listen(struct qn_server *svr, int port);
+void qn_server_cleanup(struct qn_server *svr);
+
+void qn_client_add(int fd);
+struct qn_client *qn_client_find(int fd);
+sds qn_client_get_request(struct qn_client *c);
+ssize_t qn_client_read(struct qn_client *c);
+ssize_t qn_client_write(struct qn_client *c);
+void qn_client_delete(struct qn_client *c);
+void qn_client_delete_all();
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
 
-sds ping_handler(qnd_context *ctx, sds request, sds response);
-sds time_handler(qnd_context *ctx, sds request, sds response);
-sds info_handler(qnd_context *ctx, sds request, sds response);
+sds ping_handler(struct qn_client *c);
+sds time_handler(struct qn_client *c);
+sds info_handler(struct qn_client *c);
 
 #endif

@@ -1,6 +1,6 @@
 #include "qnd.h"
 
-int qnd_context_init(qnd_context *ctx)
+int qn_server_init(struct qn_server *svr)
 {
   signal(SIGHUP, SIG_IGN);
   signal(SIGPIPE, SIG_IGN);
@@ -12,11 +12,11 @@ int qnd_context_init(qnd_context *ctx)
   return 0;
 }
 
-int qnd_context_listen(qnd_context *ctx, int port)
+int qn_server_listen(struct qn_server *svr, int port)
 {
   struct sockaddr_in addr;
 
-  if ((ctx->sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+  if ((svr->sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
     perror("socket error");
     return -1;
   }
@@ -26,12 +26,12 @@ int qnd_context_listen(qnd_context *ctx, int port)
   addr.sin_port = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
 
-  if (bind(ctx->sd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
+  if (bind(svr->sd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
     perror("bind error");
     return -1;
   }
 
-  if (listen(ctx->sd, 2) < 0) {
+  if (listen(svr->sd, 2) < 0) {
     perror("listen error");
     return -1;
   }
@@ -39,7 +39,7 @@ int qnd_context_listen(qnd_context *ctx, int port)
   return 0;
 }
 
-void qnd_context_cleanup(qnd_context *ctx)
+void qn_server_cleanup(struct qn_server *svr)
 {
   sg_shutdown();
 }

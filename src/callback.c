@@ -1,26 +1,26 @@
 #include "qnd.h"
 
-extern qnd_context ctx;
+extern struct qn_server server;
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-  struct sockaddr_in client_addr;
-  socklen_t client_len = sizeof(client_addr);
-  int client_sd;
-  struct ev_io *w_client = (struct ev_io*)malloc(sizeof(struct ev_io));
-
   if (EV_ERROR & revents) {
     perror("invalid event");
     return;
   }
 
-  client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
+  struct sockaddr_in client_addr;
+  socklen_t client_len = sizeof(client_addr);
+  int client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
 
   if (client_sd < 0) {
     perror("accept error");
     return;
   }
 
+  qn_client_add(client_sd);
+
+  struct ev_io *w_client = (struct ev_io*)malloc(sizeof(struct ev_io));
   ev_io_init(w_client, read_cb, client_sd, EV_READ);
   ev_io_start(loop, w_client);
 }
@@ -32,61 +32,58 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  ctx.rbuf_idx = recv(watcher->fd, ctx.rbuf, DEFAULT_BUFFER_SIZE, 0);
+  struct qn_client *cli = qn_client_find(watcher->fd);
+  ssize_t bytes = qn_client_read(cli);
 
-  if (ctx.rbuf_idx < 0) {
+  if (bytes < 0) {
     perror("read error");
     goto cleanup;
   }
 
-  if (ctx.rbuf_idx == 0) {
-    ev_io_stop(loop,watcher);
-    close(watcher->fd);
-    free(watcher);
-
-    perror("remote connection is closing");
+  if (bytes == 0) {
     goto cleanup;
   }
 
-  char *pos = strstr(ctx.rbuf, "\r\n");
-  if (pos == NULL) return;
+  while (1) {
+    sds request = qn_client_get_request(cli);
+    if (request == NULL) break;
 
-  sds request = sdscpylen(sdsempty(), ctx.rbuf, pos-ctx.rbuf+2);
-  sds response = sdsempty();
+    // Parse requests based on first character for now
+    switch (request[0]) {
+      case 'p':
+        cli->wbuf = ping_handler(cli);
+        break;
 
-  sdstolower(request);
+      case 't':
+        cli->wbuf = time_handler(cli);
+        break;
 
-  // Parse requests based on first character for now
-  switch (request[0]) {
-    case 'p':
-      response = ping_handler(&ctx, request, response);
-      break;
+      case 'i':
+        cli->wbuf = info_handler(cli);
+        break;
 
-    case 't':
-      response = time_handler(&ctx, request, response);
-      break;
+      default:
+        break;
+    }
 
-    case 'i':
-      response = info_handler(&ctx, request, response);
-      break;
-
-    default:
-      break;
-  }
-
-  if (sdslen(response) > 0) {
-    ssize_t bytes = send(watcher->fd, response, sdslen(response), 0);
-    if (bytes < 0) {
-      perror("send error");
+    if (strstr(cli->wbuf, "\r\n\r\n") != NULL) {
+      // TODO: set write callback to send all responses
+      bytes = qn_client_write(cli);
+      if (bytes < 0) {
+        perror("send error");
+        goto cleanup;
+      }
     }
   }
 
-  sdsfree(response);
-  sdsfree(request);
+  return;
 
 cleanup:
-  bzero(ctx.rbuf, ctx.rbuf_idx);
-  ctx.rbuf_idx = 0;
+  ev_io_stop(loop, watcher);
+  free(watcher);
+
+  close(cli->fd);
+  qn_client_delete(cli);
 }
 
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
