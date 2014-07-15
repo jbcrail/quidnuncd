@@ -25,15 +25,19 @@
 
 struct qn_server {
   /* Networking */
-  int port;                         /* TCP listening port */
-  int sd;                           /* TCP socket file descriptor */
+  int port;                                 /* TCP listening port */
+  int sd;                                   /* TCP socket file descriptor */
 
   /* Statistics */
   size_t fs_size;
-  sg_fs_stats *fs_stats;            /* Filesystem statistics */
-  sg_host_info *host_stats;         /* Host statistics */
-  sg_load_stats *load_stats;        /* Load statistics */
-  sg_mem_stats *mem_stats;          /* Memory statistics */
+  size_t net_io_size;
+  size_t net_iface_size;
+
+  sg_fs_stats *fs_stats;                    /* Filesystem statistics */
+  sg_host_info *host_stats;                 /* Host statistics */
+  sg_load_stats *load_stats;                /* Load statistics */
+  sg_mem_stats *mem_stats;                  /* Memory statistics */
+  sg_network_io_stats *net_io_stats;        /* Network I/O statistics */
 
   /* Miscellaneous */
   struct qn_client *clients;

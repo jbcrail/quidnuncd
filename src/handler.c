@@ -78,6 +78,21 @@ sds info_handler(struct qn_client *c)
       c->wbuf = sdscatprintf(c->wbuf, "memory.used=%llu\r\n", c->srv->mem_stats->used);
       c->wbuf = sdscatprintf(c->wbuf, "memory.cache=%llu\r\n", c->srv->mem_stats->cache);
       c->wbuf = sdscatprintf(c->wbuf, "memory.free=%llu\r\n", c->srv->mem_stats->free);
+    } else if (strcmp(args[i], "network") == 0) {
+      c->srv->net_io_stats = sg_get_network_io_stats(&c->srv->net_io_size);
+      if (c->srv->net_io_stats == NULL) return c->wbuf;
+
+      for (int j = 0; j < c->srv->net_io_size; j++) {
+        char *name = c->srv->net_io_stats[j].interface_name;
+
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.tx=%llu\r\n", name, c->srv->net_io_stats[j].tx);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.rx=%llu\r\n", name, c->srv->net_io_stats[j].rx);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ipackets=%llu\r\n", name, c->srv->net_io_stats[j].ipackets);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.opackets=%llu\r\n", name, c->srv->net_io_stats[j].opackets);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ierrors=%llu\r\n", name, c->srv->net_io_stats[j].ierrors);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.oerrors=%llu\r\n", name, c->srv->net_io_stats[j].oerrors);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.collisions=%llu\r\n", name, c->srv->net_io_stats[j].collisions);
+      }
     }
   }
 
