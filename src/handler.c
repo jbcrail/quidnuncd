@@ -32,8 +32,8 @@ sds info_handler(struct qn_client *c)
       "server.os_release=%s\r\n"
       "server.os_platform=%s\r\n"
       "server.hostname=%s\r\n"
-      "server.uptime_in_seconds=%lld\r\n"
-      "server.uptime_in_days=%lld\r\n"
+      "server.uptime_in_seconds=%ju\r\n"
+      "server.uptime_in_days=%ju\r\n"
       "server.cpu_max=%u\r\n"
       "server.cpu_available=%u\r\n"
       "server.arch_bits=%u\r\n",
@@ -41,8 +41,8 @@ sds info_handler(struct qn_client *c)
       host_stats->os_release,
       host_stats->platform,
       host_stats->hostname,
-      (uint64_t)host_stats->uptime,
-      (uint64_t)host_stats->uptime/60/60/24,
+      (uintmax_t)host_stats->uptime,
+      (uintmax_t)host_stats->uptime/60/60/24,
       host_stats->maxcpus,
       host_stats->ncpus,
       host_stats->bitwidth);
