@@ -24,74 +24,76 @@ sds info_handler(struct qn_client *c)
   sds *args = sdssplitargs(c->request, &argc);
 
   if (argc == 1) {
-    c->srv->host_stats = sg_get_host_info(NULL);
-    if (c->srv->host_stats == NULL) return c->wbuf;
+    sg_host_info *host_stats = sg_get_host_info(NULL);
+    if (host_stats == NULL) return c->wbuf;
 
-    c->wbuf = sdscatprintf(c->wbuf, "server.os_name=%s\r\n", c->srv->host_stats->os_name);
-    c->wbuf = sdscatprintf(c->wbuf, "server.os_release=%s\r\n", c->srv->host_stats->os_release);
-    c->wbuf = sdscatprintf(c->wbuf, "server.os_platform=%s\r\n", c->srv->host_stats->platform);
-    c->wbuf = sdscatprintf(c->wbuf, "server.hostname=%s\r\n", c->srv->host_stats->hostname);
-    c->wbuf = sdscatprintf(c->wbuf, "server.uptime_in_seconds=%lld\r\n", (uint64_t)c->srv->host_stats->uptime);
-    c->wbuf = sdscatprintf(c->wbuf, "server.uptime_in_days=%lld\r\n", (uint64_t)c->srv->host_stats->uptime/60/60/24);
-    c->wbuf = sdscatprintf(c->wbuf, "server.cpu_max=%u\r\n", c->srv->host_stats->maxcpus);
-    c->wbuf = sdscatprintf(c->wbuf, "server.cpu_available=%u\r\n", c->srv->host_stats->ncpus);
-    c->wbuf = sdscatprintf(c->wbuf, "server.arch_bits=%u\r\n", c->srv->host_stats->bitwidth);
+    c->wbuf = sdscatprintf(c->wbuf, "server.os_name=%s\r\n", host_stats->os_name);
+    c->wbuf = sdscatprintf(c->wbuf, "server.os_release=%s\r\n", host_stats->os_release);
+    c->wbuf = sdscatprintf(c->wbuf, "server.os_platform=%s\r\n", host_stats->platform);
+    c->wbuf = sdscatprintf(c->wbuf, "server.hostname=%s\r\n", host_stats->hostname);
+    c->wbuf = sdscatprintf(c->wbuf, "server.uptime_in_seconds=%lld\r\n", (uint64_t)host_stats->uptime);
+    c->wbuf = sdscatprintf(c->wbuf, "server.uptime_in_days=%lld\r\n", (uint64_t)host_stats->uptime/60/60/24);
+    c->wbuf = sdscatprintf(c->wbuf, "server.cpu_max=%u\r\n", host_stats->maxcpus);
+    c->wbuf = sdscatprintf(c->wbuf, "server.cpu_available=%u\r\n", host_stats->ncpus);
+    c->wbuf = sdscatprintf(c->wbuf, "server.arch_bits=%u\r\n", host_stats->bitwidth);
 
     goto cleanup;
   }
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(args[i], "fs") == 0) {
-      c->srv->fs_stats = sg_get_fs_stats(&c->srv->fs_size);
-      if (c->srv->fs_stats == NULL) return c->wbuf;
+      size_t fs_size;
+      sg_fs_stats *fs_stats = sg_get_fs_stats(&fs_size);
+      if (fs_stats == NULL) return c->wbuf;
 
-      for (int j = 0; j < c->srv->fs_size; j++) {
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail=%llu\r\n", j, c->srv->fs_stats[j].avail);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail_blocks=%llu\r\n", j, c->srv->fs_stats[j].avail_blocks);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail_inodes=%llu\r\n", j, c->srv->fs_stats[j].avail_inodes);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.block_size=%llu\r\n", j, c->srv->fs_stats[j].block_size);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.device=%s\r\n", j, c->srv->fs_stats[j].device_name);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.free_blocks=%llu\r\n", j, c->srv->fs_stats[j].free_blocks);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.free_inodes=%llu\r\n", j, c->srv->fs_stats[j].free_inodes);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.fs_type=%s\r\n", j, c->srv->fs_stats[j].fs_type);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.io_size=%llu\r\n", j, c->srv->fs_stats[j].io_size);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.mount=%s\r\n", j, c->srv->fs_stats[j].mnt_point);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.size=%llu\r\n", j, c->srv->fs_stats[j].size);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.total_blocks=%llu\r\n", j, c->srv->fs_stats[j].total_blocks);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.total_inodes=%llu\r\n", j, c->srv->fs_stats[j].total_inodes);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used=%llu\r\n", j, c->srv->fs_stats[j].used);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used_blocks=%llu\r\n", j, c->srv->fs_stats[j].used_blocks);
-        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used_inodes=%llu\r\n", j, c->srv->fs_stats[j].used_inodes);
+      for (int j = 0; j < fs_size; j++) {
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail=%llu\r\n", j, fs_stats[j].avail);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail_blocks=%llu\r\n", j, fs_stats[j].avail_blocks);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.avail_inodes=%llu\r\n", j, fs_stats[j].avail_inodes);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.block_size=%llu\r\n", j, fs_stats[j].block_size);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.device=%s\r\n", j, fs_stats[j].device_name);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.free_blocks=%llu\r\n", j, fs_stats[j].free_blocks);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.free_inodes=%llu\r\n", j, fs_stats[j].free_inodes);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.fs_type=%s\r\n", j, fs_stats[j].fs_type);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.io_size=%llu\r\n", j, fs_stats[j].io_size);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.mount=%s\r\n", j, fs_stats[j].mnt_point);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.size=%llu\r\n", j, fs_stats[j].size);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.total_blocks=%llu\r\n", j, fs_stats[j].total_blocks);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.total_inodes=%llu\r\n", j, fs_stats[j].total_inodes);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used=%llu\r\n", j, fs_stats[j].used);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used_blocks=%llu\r\n", j, fs_stats[j].used_blocks);
+        c->wbuf = sdscatprintf(c->wbuf, "fs.%d.used_inodes=%llu\r\n", j, fs_stats[j].used_inodes);
       }
     } else if (strcmp(args[i], "load") == 0) {
-      c->srv->load_stats = sg_get_load_stats(NULL);
-      if (c->srv->load_stats == NULL) return c->wbuf;
+      sg_load_stats *load_stats = sg_get_load_stats(NULL);
+      if (load_stats == NULL) return c->wbuf;
 
-      c->wbuf = sdscatprintf(c->wbuf, "load.min1=%0.2f\r\n", c->srv->load_stats->min1);
-      c->wbuf = sdscatprintf(c->wbuf, "load.min5=%0.2f\r\n", c->srv->load_stats->min5);
-      c->wbuf = sdscatprintf(c->wbuf, "load.min15=%0.2f\r\n", c->srv->load_stats->min15);
+      c->wbuf = sdscatprintf(c->wbuf, "load.min1=%0.2f\r\n", load_stats->min1);
+      c->wbuf = sdscatprintf(c->wbuf, "load.min5=%0.2f\r\n", load_stats->min5);
+      c->wbuf = sdscatprintf(c->wbuf, "load.min15=%0.2f\r\n", load_stats->min15);
     } else if (strcmp(args[i], "memory") == 0) {
-      c->srv->mem_stats = sg_get_mem_stats(NULL);
-      if (c->srv->mem_stats == NULL) return c->wbuf;
+      sg_mem_stats *mem_stats = sg_get_mem_stats(NULL);
+      if (mem_stats == NULL) return c->wbuf;
 
-      c->wbuf = sdscatprintf(c->wbuf, "memory.total=%llu\r\n", c->srv->mem_stats->total);
-      c->wbuf = sdscatprintf(c->wbuf, "memory.used=%llu\r\n", c->srv->mem_stats->used);
-      c->wbuf = sdscatprintf(c->wbuf, "memory.cache=%llu\r\n", c->srv->mem_stats->cache);
-      c->wbuf = sdscatprintf(c->wbuf, "memory.free=%llu\r\n", c->srv->mem_stats->free);
+      c->wbuf = sdscatprintf(c->wbuf, "memory.total=%llu\r\n", mem_stats->total);
+      c->wbuf = sdscatprintf(c->wbuf, "memory.used=%llu\r\n", mem_stats->used);
+      c->wbuf = sdscatprintf(c->wbuf, "memory.cache=%llu\r\n", mem_stats->cache);
+      c->wbuf = sdscatprintf(c->wbuf, "memory.free=%llu\r\n", mem_stats->free);
     } else if (strcmp(args[i], "network") == 0) {
-      c->srv->net_io_stats = sg_get_network_io_stats(&c->srv->net_io_size);
-      if (c->srv->net_io_stats == NULL) return c->wbuf;
+      size_t net_io_size;
+      sg_network_io_stats *net_io_stats = sg_get_network_io_stats(&net_io_size);
+      if (net_io_stats == NULL) return c->wbuf;
 
-      for (int j = 0; j < c->srv->net_io_size; j++) {
-        char *name = c->srv->net_io_stats[j].interface_name;
+      for (int j = 0; j < net_io_size; j++) {
+        char *name = net_io_stats[j].interface_name;
 
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.tx=%llu\r\n", name, c->srv->net_io_stats[j].tx);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.rx=%llu\r\n", name, c->srv->net_io_stats[j].rx);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ipackets=%llu\r\n", name, c->srv->net_io_stats[j].ipackets);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.opackets=%llu\r\n", name, c->srv->net_io_stats[j].opackets);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ierrors=%llu\r\n", name, c->srv->net_io_stats[j].ierrors);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.oerrors=%llu\r\n", name, c->srv->net_io_stats[j].oerrors);
-        c->wbuf = sdscatprintf(c->wbuf, "net.%s.collisions=%llu\r\n", name, c->srv->net_io_stats[j].collisions);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.tx=%llu\r\n", name, net_io_stats[j].tx);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.rx=%llu\r\n", name, net_io_stats[j].rx);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ipackets=%llu\r\n", name, net_io_stats[j].ipackets);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.opackets=%llu\r\n", name, net_io_stats[j].opackets);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.ierrors=%llu\r\n", name, net_io_stats[j].ierrors);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.oerrors=%llu\r\n", name, net_io_stats[j].oerrors);
+        c->wbuf = sdscatprintf(c->wbuf, "net.%s.collisions=%llu\r\n", name, net_io_stats[j].collisions);
       }
     }
   }
