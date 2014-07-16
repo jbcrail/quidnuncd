@@ -34,7 +34,8 @@ sds qn_client_get_request(struct qn_client *c)
   char *pos = strstr(c->rbuf, "\r\n");
   if (pos == NULL) return NULL;
 
-  c->request = sdscpylen(c->request, c->rbuf, pos - c->rbuf + 2);
+  // copy everything but the carriage return and line feed
+  c->request = sdscpylen(c->request, c->rbuf, pos - c->rbuf);
   sdstolower(c->request);
 
   sdsrange(c->rbuf, pos - c->rbuf + 2, -1);
