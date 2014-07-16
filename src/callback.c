@@ -62,7 +62,11 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
         cli->wbuf = info_handler(cli);
         break;
 
+      case 'q':
+        goto cleanup;
+
       default:
+        cli->wbuf = sdscatprintf(cli->wbuf, "error=invalid command: %s\r\n\r\n", request);
         break;
     }
 
