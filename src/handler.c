@@ -139,6 +139,15 @@ sds info_handler(struct qn_client *c)
           name, net_io_stats[j].oerrors,
           name, net_io_stats[j].collisions);
       }
+    } else if (strcmp(args[i], "page") == 0) {
+      sg_page_stats *page_stats = sg_get_page_stats(NULL);
+      if (page_stats == NULL) return c->wbuf;
+
+      c->wbuf = sdscatprintf(c->wbuf,
+        "page.in=%llu\r\n"
+        "page.out=%llu\r\n",
+        page_stats->pages_pagein,
+        page_stats->pages_pageout);
     }
   }
 
