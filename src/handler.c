@@ -148,6 +148,17 @@ sds info_handler(struct qn_client *c)
         "page.out=%llu\r\n",
         page_stats->pages_pagein,
         page_stats->pages_pageout);
+    } else if (strcmp(args[i], "swap") == 0) {
+      sg_swap_stats *swap_stats = sg_get_swap_stats(NULL);
+      if (swap_stats == NULL) return c->wbuf;
+
+      c->wbuf = sdscatprintf(c->wbuf,
+        "swap.total=%llu\r\n"
+        "swap.free=%llu\r\n"
+        "swap.used=%llu\r\n",
+        swap_stats->total,
+        swap_stats->used,
+        swap_stats->free);
     }
   }
 
