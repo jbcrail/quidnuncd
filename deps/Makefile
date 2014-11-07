@@ -10,8 +10,8 @@ else # Linux, Darwin
 	CFGFLAGS=--enable-static --disable-shared
 endif
 
-SGVER=0.90
-EVVER=4.15
+SGVER=0.91
+EVVER=4.19
 
 LIBEV=target/lib/libev.$(LIBSUFFIX)
 LIBSTATGRAB=target/lib/libstatgrab.$(LIBSUFFIX)
