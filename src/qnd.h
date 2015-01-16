@@ -20,7 +20,7 @@
 #include "statgrab.h"
 #include "uthash.h"
 
-#define DEFAULT_HEARTBEAT   5.0
+#define DEFAULT_HEARTBEAT   5
 #define DEFAULT_PORT        3230
 #define DEFAULT_BUFFER_SIZE 16*1024
 
