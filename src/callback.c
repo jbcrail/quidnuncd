@@ -102,3 +102,7 @@ void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)
 {
   ev_break(loop, EVBREAK_ALL);
 }
+
+void heartbeat_cb(struct ev_loop *loop, ev_periodic *w, int revents)
+{
+}

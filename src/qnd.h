@@ -20,6 +20,7 @@
 #include "statgrab.h"
 #include "uthash.h"
 
+#define DEFAULT_HEARTBEAT   5.0
 #define DEFAULT_PORT        3230
 #define DEFAULT_BUFFER_SIZE 16*1024
 
@@ -58,6 +59,7 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
+void heartbeat_cb(struct ev_loop *loop, ev_periodic *w, int revents);
 
 sds ping_handler(struct qn_client *c);
 sds time_handler(struct qn_client *c);
