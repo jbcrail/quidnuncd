@@ -31,6 +31,12 @@ int qn_server_listen(struct qn_server *svr, int port)
     return -1;
   }
 
+  int option = 1;
+  if (setsockopt(svr->sd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option)) < 0) {
+    perror("setsockopt error");
+    return -1;
+  }
+
   if (listen(svr->sd, 2) < 0) {
     perror("listen error");
     return -1;
