@@ -6,6 +6,7 @@ LIBS=../deps/target/lib/libev.a ../deps/target/lib/libstatgrab.a
 CFLAGS=-g -Wall -Werror -O0 -std=c99 -I ../deps/target/include
 
 ifeq ($(uname_S),Linux)
+	CFLAGS+= -D_XOPEN_SOURCE
 	LIBS+= -lpthread -lm
 endif
 ifeq ($(uname_S),Darwin)
