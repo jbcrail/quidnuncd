@@ -9,6 +9,9 @@ ifeq ($(uname_S),Linux)
 	CFLAGS+= -D_XOPEN_SOURCE
 	LIBS+= -lpthread -lm
 endif
+ifeq ($(uname_S),FreeBSD)
+	LIBS+= -ldevstat -lpthread -lm
+endif
 ifeq ($(uname_S),Darwin)
 	LIBS+= -framework CoreFoundation -framework IOKit
 endif
