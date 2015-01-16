@@ -5,7 +5,8 @@ PREFIX = `pwd`/../target
 ifeq ($(uname_S),SunOS)
 	LIBSUFFIX=so
 	CFGFLAGS=--enable-shared --disable-static
-else # Linux, Darwin
+	AM_CFLAGS=-DECB_NO_SMP # Disable memory barriers for Solaris
+else # Linux, Darwin, FreeBSD
 	LIBSUFFIX=a
 	CFGFLAGS=--enable-static --disable-shared
 endif
@@ -31,10 +32,10 @@ $(LIBSTATGRAB):
 
 $(LIBEV):
 	@printf '[%b]\n' $(MAKECOLOR)libev$(ENDCOLOR)
-	@wget -q -O libev-$(EVVER).tar.gz http://dist.schmorp.de/libev/libev-$(EVVER).tar.gz
+	@wget -q -O libev-$(EVVER).tar.gz http://dist.schmorp.de/libev/Attic/libev-$(EVVER).tar.gz
 	@tar -xpf libev-$(EVVER).tar.gz
 	@cd libev-$(EVVER) && ./configure --prefix=$(PREFIX) $(CFGFLAGS)
-	@cd libev-$(EVVER) && make && make install
+	@cd libev-$(EVVER) && make AM_CFLAGS=$(AM_CFLAGS) && make install
 	@echo
 
 clean:
