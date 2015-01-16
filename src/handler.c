@@ -5,7 +5,11 @@ sds write_timestamp(sds s)
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
-  return sdscatprintf(s, "time.secs=%ju\r\ntime.usecs=%ju\r\n\r\n", (uintmax_t)tv.tv_sec, (uintmax_t)tv.tv_usec);
+  return sdscatprintf(s,
+    "time.secs=%" PRIuMAX "\r\n"
+    "time.usecs=%" PRIuMAX "\r\n\r\n",
+    (uintmax_t)tv.tv_sec,
+    (uintmax_t)tv.tv_usec);
 }
 
 sds ping_handler(struct qn_client *c)
@@ -32,8 +36,8 @@ sds info_handler(struct qn_client *c)
       "server.os_release=%s\r\n"
       "server.os_platform=%s\r\n"
       "server.hostname=%s\r\n"
-      "server.uptime_in_seconds=%ju\r\n"
-      "server.uptime_in_days=%ju\r\n"
+      "server.uptime_in_seconds=%" PRIuMAX "\r\n"
+      "server.uptime_in_days=%" PRIuMAX "\r\n"
       "server.cpu_max=%u\r\n"
       "server.cpu_available=%u\r\n"
       "server.arch_bits=%u\r\n",
