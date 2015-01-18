@@ -80,6 +80,7 @@ int main(int argc, char **argv)
   ev_signal_stop(loop, &signal_watcher);
   ev_io_stop(loop, &w_accept);
   qn_server_cleanup(&server);
+  qn_client_delete_all();
 
   return 0;
 }

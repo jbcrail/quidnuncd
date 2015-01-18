@@ -47,6 +47,11 @@ int qn_server_listen(struct qn_server *svr, int port)
 
 void qn_server_cleanup(struct qn_server *svr)
 {
+  struct qn_client *current, *tmp;
+  HASH_ITER(hh, svr->clients, current, tmp) {
+    close(current->fd);
+  }
+
   sg_shutdown();
   ev_loop_destroy(EV_DEFAULT_UC);
 }
