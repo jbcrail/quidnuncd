@@ -12,35 +12,56 @@ int qn_server_init(struct qn_server *svr)
   return 0;
 }
 
-int qn_server_listen(struct qn_server *svr, int port)
+int qn_server_listen(struct qn_server *svr, const char *host, const char *port)
 {
-  struct sockaddr_in addr;
+  int listenfd;
+  const int option = 1;
+  struct addrinfo hints, *res, *reshead;
 
-  if ((svr->sd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("socket error");
+  // Resolve hostname only for IPv4 addresses
+  bzero(&hints, sizeof(struct addrinfo));
+  hints.ai_flags = AI_PASSIVE;
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+
+  if (getaddrinfo(host, port, &hints, &res) != 0) {
+    perror("getaddrinfo");
     return -1;
   }
 
-  bzero(&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
+  reshead = res;
 
-  if (bind(svr->sd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
-    perror("bind error");
+  do {
+    listenfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (listenfd < 0) {
+      continue;
+    }
+
+    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option)) < 0) {
+      perror("setsockopt");
+      return -1;
+    }
+
+    if (bind(listenfd, res->ai_addr, res->ai_addrlen) == 0) {
+      break;
+    }
+
+    close(listenfd);
+  } while ((res = res->ai_next) != NULL);
+
+  if (res == NULL) {
+    fprintf(stderr, "qn_server_listen error for %s:%s\n", host, port);
     return -1;
   }
 
-  int option = 1;
-  if (setsockopt(svr->sd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option)) < 0) {
-    perror("setsockopt error");
+  if (listen(listenfd, 2) < 0) {
+    perror("listen");
     return -1;
   }
 
-  if (listen(svr->sd, 2) < 0) {
-    perror("listen error");
-    return -1;
-  }
+  freeaddrinfo(reshead);
+
+  svr->sd = listenfd;
 
   return 0;
 }

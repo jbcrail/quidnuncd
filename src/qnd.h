@@ -11,6 +11,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -24,13 +25,13 @@
 #define QND_VERSION         "0.1.0"
 
 #define DEFAULT_HEARTBEAT   5
-#define DEFAULT_PORT        3230
+#define DEFAULT_HOST        "0.0.0.0"
+#define DEFAULT_PORT        "3230"
 #define DEFAULT_BUFFER_SIZE 16*1024
 
 struct qn_server {
-  /* Networking */
-  int port;                                 /* TCP listening port */
-  int sd;                                   /* TCP socket file descriptor */
+  /* TCP socket file descriptor */
+  int sd;
 
   /* Miscellaneous */
   struct qn_client *clients;
@@ -53,7 +54,7 @@ struct qn_client {
 };
 
 int qn_server_init(struct qn_server *svr);
-int qn_server_listen(struct qn_server *svr, int port);
+int qn_server_listen(struct qn_server *svr, const char *host, const char *port);
 void qn_server_cleanup(struct qn_server *svr);
 
 void qn_client_add(int fd);

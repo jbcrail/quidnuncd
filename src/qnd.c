@@ -5,7 +5,7 @@ struct qn_server server;
 
 struct qn_options {
   char *host;
-  int port;
+  char *port;
   int heartbeat_interval;
 };
 
@@ -17,7 +17,7 @@ void usage()
 "  --help                       show this help\n"
 "  --version                    show version information\n"
 "  --host <address>             listen on address (default is 0.0.0.0)\n"
-"  --port <int>                 listen on port (default is %d)\n"
+"  --port <int>                 listen on port (default is %s)\n"
 "  --heartbeat-interval <int>   issue a heartbeat once every <int> seconds\n",
   DEFAULT_PORT);
 
@@ -36,7 +36,7 @@ void parse_args(int argc, char **argv, struct qn_options *options)
     } else if (!strcasecmp(argv[i],"--host") && !lastarg) {
       options->host = argv[++i];
     } else if (!strcasecmp(argv[i],"--port") && !lastarg) {
-      options->port = strtol(argv[++i], (char **)0, 10);
+      options->port = argv[++i];
     } else if (!strcasecmp(argv[i],"--heartbeat-interval") && !lastarg) {
       options->heartbeat_interval = strtol(argv[++i], (char **)0, 10);
     } else {
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 {
   // Define default options
   struct qn_options options;
-  options.host = "0.0.0.0";
+  options.host = DEFAULT_HOST;
   options.port = DEFAULT_PORT;
   options.heartbeat_interval = DEFAULT_HEARTBEAT;
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
   struct ev_loop *loop = ev_default_loop(0);
 
   qn_server_init(&server);
-  if (qn_server_listen(&server, options.port) == -1) {
+  if (qn_server_listen(&server, options.host, options.port) == -1) {
     exit(EXIT_FAILURE);
   }
 
