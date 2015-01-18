@@ -21,6 +21,8 @@
 #include "statgrab.h"
 #include "uthash.h"
 
+#define QND_VERSION         "0.1.0"
+
 #define DEFAULT_HEARTBEAT   5
 #define DEFAULT_PORT        3230
 #define DEFAULT_BUFFER_SIZE 16*1024
