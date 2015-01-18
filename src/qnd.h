@@ -70,6 +70,7 @@ void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
 void heartbeat_cb(struct ev_loop *loop, ev_periodic *w, int revents);
 
+sds help_handler(struct qn_client *c);
 sds ping_handler(struct qn_client *c);
 sds time_handler(struct qn_client *c);
 sds info_handler(struct qn_client *c);

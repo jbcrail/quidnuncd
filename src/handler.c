@@ -12,6 +12,17 @@ sds write_timestamp(sds s)
     (uintmax_t)tv.tv_usec);
 }
 
+sds help_handler(struct qn_client *c)
+{
+  return sdscatprintf(c->wbuf,
+    "HELP\r\n"
+    "INFO [fs|load|memory|network|page|stats|swap]\r\n"
+    "PING\r\n"
+    "QUIT\r\n"
+    "TIME\r\n"
+    "\r\n");
+}
+
 sds ping_handler(struct qn_client *c)
 {
   return sdscatprintf(c->wbuf, "pong\r\n\r\n");

@@ -53,6 +53,10 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
     // Parse requests based on first character for now
     switch (request[0]) {
+      case 'h':
+        cli->wbuf = help_handler(cli);
+        break;
+
       case 'p':
         cli->wbuf = ping_handler(cli);
         break;
