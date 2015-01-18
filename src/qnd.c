@@ -17,8 +17,9 @@ void usage()
 "  --help                       show this help\n"
 "  --version                    show version information\n"
 "  --host <address>             listen on address (default is 0.0.0.0)\n"
-"  --port <int>                 listen on port (default is 3230)\n"
-"  --heartbeat-interval <int>   issue a heartbeat once every <int> seconds\n");
+"  --port <int>                 listen on port (default is %d)\n"
+"  --heartbeat-interval <int>   issue a heartbeat once every <int> seconds\n",
+  DEFAULT_PORT);
 
   exit(EXIT_SUCCESS);
 }
