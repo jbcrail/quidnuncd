@@ -4,8 +4,8 @@ extern struct qn_server server;
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-  if (EV_ERROR & revents) {
-    perror("invalid event");
+  // Ignore non-readable events
+  if ((revents | EV_READ) == 0) {
     return;
   }
 
@@ -29,8 +29,8 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-  if (EV_ERROR & revents) {
-    perror("invalid event");
+  // Ignore non-readable events
+  if ((revents | EV_READ) == 0) {
     return;
   }
 
@@ -96,8 +96,8 @@ cleanup:
 
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-  if (EV_ERROR & revents) {
-    perror("invalid event");
+  // Ignore non-writeable events
+  if ((revents | EV_WRITE) == 0) {
     return;
   }
 }
