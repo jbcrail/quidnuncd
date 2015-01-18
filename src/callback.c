@@ -19,6 +19,8 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   }
 
   qn_client_add(client_sd);
+  server.total_clients++;
+  server.active_clients++;
 
   struct ev_io *w_client = (struct ev_io*)malloc(sizeof(struct ev_io));
   ev_io_init(w_client, read_cb, client_sd, EV_READ);
@@ -47,6 +49,7 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   while (1) {
     sds request = qn_client_get_request(cli);
     if (request == NULL) break;
+    cli->srv->total_requests++;
 
     // Parse requests based on first character for now
     switch (request[0]) {
@@ -88,6 +91,7 @@ cleanup:
 
   close(cli->fd);
   qn_client_delete(cli);
+  server.active_clients--;
 }
 
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
@@ -105,4 +109,5 @@ void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)
 
 void heartbeat_cb(struct ev_loop *loop, ev_periodic *w, int revents)
 {
+  server.heartbeats++;
 }

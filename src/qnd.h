@@ -32,6 +32,12 @@ struct qn_server {
 
   /* Miscellaneous */
   struct qn_client *clients;
+
+  /* Statistics */
+  uint64_t total_clients;
+  uint64_t active_clients;
+  uint64_t total_requests;
+  uint64_t heartbeats;
 };
 
 struct qn_client {

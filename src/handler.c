@@ -163,6 +163,16 @@ sds info_handler(struct qn_client *c)
         swap_stats->total,
         swap_stats->used,
         swap_stats->free);
+    } else if (strcmp(args[i], "stats") == 0) {
+      c->wbuf = sdscatprintf(c->wbuf,
+        "stats.total_clients=%llu\r\n"
+        "stats.active_clients=%llu\r\n"
+        "stats.total_requests=%llu\r\n"
+        "stats.heartbeats=%llu\r\n",
+        c->srv->total_clients,
+        c->srv->active_clients,
+        c->srv->total_requests,
+        c->srv->heartbeats);
     }
   }
 
