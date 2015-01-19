@@ -10,7 +10,7 @@ function find_and_set()
   eval $__var=""
   for arg in ${@:2}
   do
-    if [ `(which $arg) 2>/dev/null` ]
+    if [[ `(which $arg) 2>/dev/null` ]]
     then
       eval $__var="$arg"
       break
@@ -25,7 +25,7 @@ echo -n "checking host system type... "
 OS_ARCH=`(uname -m) 2>/dev/null` || OS_ARCH=unknown
 OS_NAME=`(uname -s) 2>/dev/null` || OS_NAME=unknown
 OS_RELEASE=`(uname -r) 2>/dev/null` || OS_RELEASE=unknown
-OS=`(echo ${OS_ARCH}-${OS_NAME}-${OS_RELEASE} | awk '{print tolower($0)}')`
+OS=`(echo ${OS_ARCH}-${OS_NAME}-${OS_RELEASE} | tr "[A-Z]" "[a-z]")`
 
 echo "${OS}"
 
@@ -39,35 +39,35 @@ find_and_set MAKE "gmake" "make"
 find_and_set TAR  "gtar" "tar"
 find_and_set WGET "wget"
 
-CFLAGS="-g -O2 -Wall -pedantic "
+CFLAGS="-g -O2 -Wall -pedantic"
 
 case ${OS} in
     *linux*)
-        CFLAGS+="-std=c99 -D_XOPEN_SOURCE"
+        CFLAGS="${CFLAGS} -std=c99 -D_XOPEN_SOURCE"
         LDFLAGS="-lm -lpthread"
         ;;
 
     *darwin*)
-        CFLAGS+="-std=c99"
+        CFLAGS="${CFLAGS} -std=c99"
         LDFLAGS="-framework CoreFoundation -framework IOKit"
         ;;
 
     *freebsd*)
-        CFLAGS+="-std=c99"
+        CFLAGS="${CFLAGS} -std=c99"
         LDFLAGS="-lm -lpthread -ldevstat"
         ;;
 
-    *solaris*)
-        CFLAGS+="-D__EXTENSIONS__"
+    *sunos*) # Solaris
+        CFLAGS="${CFLAGS} -D__EXTENSIONS__"
         LDFLAGS="-lm -pthreads -lnsl -lsocket -lrt -lkstat -ldevinfo -R ../deps/target/lib"
         case ${OS} in
-            *solaris-2.8*)
-                CFLAGS+="-std=gnu99 -D_XOPEN_SOURCE -D_XPG4_2"
-                AM_CFLAGS=-DECB_NO_SMP # Disable memory barriers
+            *sunos-5.8*) # Solaris 8
+                CFLAGS="${CFLAGS} -std=gnu99 -D_XOPEN_SOURCE -D_XPG4_2"
+                AM_CFLAGS="-DECB_NO_SMP" # Disable memory barriers
                 ;;
 
               *)
-                CFLAGS+="-std=c99"
+                CFLAGS="-${CFLAGS} std=c99"
                 ;;
         esac
         ;;
