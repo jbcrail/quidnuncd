@@ -1,0 +1,36 @@
+WGET = @WGET@
+TAR = @TAR@
+AM_CFLAGS = @AM_CFLAGS@
+
+PREFIX = `pwd`/../target
+CFGFLAGS=--enable-static --disable-shared
+
+SGVER=0.91
+EVVER=4.19
+
+LIBEV=target/lib/libev.a
+LIBSTATGRAB=target/lib/libstatgrab.a
+
+all: $(LIBSTATGRAB) $(LIBEV)
+
+MAKECOLOR="\033[32;1m"
+ENDCOLOR="\033[0m"
+
+$(LIBSTATGRAB):
+	@printf '[%b]\n' $(MAKECOLOR)libstatgrab$(ENDCOLOR)
+	@$(WGET) -q -O libstatgrab-$(SGVER).tar.gz http://ftp.i-scream.org/pub/i-scream/libstatgrab/libstatgrab-$(SGVER).tar.gz
+	@$(TAR) -zxpf libstatgrab-$(SGVER).tar.gz
+	@cd libstatgrab-$(SGVER) && ./configure --prefix=$(PREFIX) --disable-tests $(CFGFLAGS)
+	@cd libstatgrab-$(SGVER) && make && make install
+	@echo
+
+$(LIBEV):
+	@printf '[%b]\n' $(MAKECOLOR)libev$(ENDCOLOR)
+	@$(WGET) -q -O libev-$(EVVER).tar.gz http://dist.schmorp.de/libev/Attic/libev-$(EVVER).tar.gz
+	@$(TAR) -zxpf libev-$(EVVER).tar.gz
+	@cd libev-$(EVVER) && ./configure --prefix=$(PREFIX) $(CFGFLAGS)
+	@cd libev-$(EVVER) && make AM_CFLAGS=$(AM_CFLAGS) && make install
+	@echo
+
+clean:
+	@rm -rf target libstatgrab* libev*

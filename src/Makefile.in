@@ -1,0 +1,16 @@
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+
+PROGRAM=qnd
+OBJS=qnd.o client.o server.o callback.o handler.o sds.o
+CFLAGS+= -I ../deps/target/include
+LIBS=../deps/target/lib/libev.a ../deps/target/lib/libstatgrab.a
+
+all: $(PROGRAM)
+
+$(PROGRAM): $(OBJS)
+	$(CC) $(OBJS) $(LIBS) $(LDFLAGS) -o $@
+
+clean:
+	@rm -rf $(OBJS) $(PROGRAM)

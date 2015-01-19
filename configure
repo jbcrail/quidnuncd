@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Given a variable name and a non-empty list of possible programs, this function
+# will find the first viable item in the available programs and set the
+# variable. If no viable program exists, then the variable is set to an empty
+# string.
+function find_and_set()
+{
+  local __var=$1
+  eval $__var=""
+  for arg in ${@:2}
+  do
+    if [ `(which $arg) 2>/dev/null` ]
+    then
+      eval $__var="$arg"
+      break
+    fi
+  done
+}
+
+################################################################################
+
+echo -n "checking host system type... "
+
+OS_ARCH=`(uname -m) 2>/dev/null` || OS_ARCH=unknown
+OS_NAME=`(uname -s) 2>/dev/null` || OS_NAME=unknown
+OS_RELEASE=`(uname -r) 2>/dev/null` || OS_RELEASE=unknown
+OS=`(echo ${OS_ARCH}-${OS_NAME}-${OS_RELEASE} | awk '{print tolower($0)}')`
+
+echo "${OS}"
+
+################################################################################
+
+echo "configuring build..."
+
+find_and_set AR   "gar" "ar"
+find_and_set CC   "gcc" "clang" "cc"
+find_and_set MAKE "gmake" "make"
+find_and_set TAR  "gtar" "tar"
+find_and_set WGET "wget"
+
+CFLAGS="-g -O2 -Wall -pedantic "
+
+case ${OS} in
+    *linux*)
+        CFLAGS+="-std=c99 -D_XOPEN_SOURCE"
+        LDFLAGS="-lm -lpthread"
+        ;;
+
+    *darwin*)
+        CFLAGS+="-std=c99"
+        LDFLAGS="-framework CoreFoundation -framework IOKit"
+        ;;
+
+    *freebsd*)
+        CFLAGS+="-std=c99"
+        LDFLAGS="-lm -lpthread -ldevstat"
+        ;;
+
+    *solaris*)
+        CFLAGS+="-D__EXTENSIONS__"
+        LDFLAGS="-lm -pthreads -lnsl -lsocket -lrt -lkstat -ldevinfo -R ../deps/target/lib"
+        case ${OS} in
+            *solaris-2.8*)
+                CFLAGS+="-std=gnu99 -D_XOPEN_SOURCE -D_XPG4_2"
+                AM_CFLAGS=-DECB_NO_SMP # Disable memory barriers
+                ;;
+
+              *)
+                CFLAGS+="-std=c99"
+                ;;
+        esac
+        ;;
+
+    *)
+        exit 1;;
+esac
+
+echo
+echo "  AR        = ${AR}"
+echo "  CC        = ${CC}"
+echo "  MAKE      = ${MAKE}"
+echo "  TAR       = ${TAR}"
+echo "  WGET      = ${WGET}"
+echo "  AM_CFLAGS = ${AM_CFLAGS}"
+echo "  CFLAGS    = ${CFLAGS}"
+echo "  LDFLAGS   = ${LDFLAGS}"
+echo
+
+################################################################################
+
+SUB_VARS="s|@CC@|${CC}|g"
+SUB_VARS="${SUB_VARS};s|@AR@|${AR}|g"
+SUB_VARS="${SUB_VARS};s|@MAKE@|${MAKE}|g"
+SUB_VARS="${SUB_VARS};s|@TAR@|${TAR}|g"
+SUB_VARS="${SUB_VARS};s|@WGET@|${WGET}|g"
+SUB_VARS="${SUB_VARS};s|@AM_CFLAGS@|${AM_CFLAGS}|g"
+SUB_VARS="${SUB_VARS};s|@CFLAGS@|${CFLAGS}|g"
+SUB_VARS="${SUB_VARS};s|@LDFLAGS@|${LDFLAGS}|g"
+
+echo "creating Makefile"
+sed -e "${SUB_VARS}" Makefile.in > Makefile
+
+echo "creating deps/Makefile"
+sed -e "${SUB_VARS}" deps/Makefile.in > deps/Makefile
+
+echo "creating src/Makefile"
+sed -e "${SUB_VARS}" src/Makefile.in > src/Makefile
