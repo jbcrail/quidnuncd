@@ -1,7 +1,4 @@
 language: c
-compiler:
-  - gcc
-  - clang
 before_script:
   - ./configure
 script:
