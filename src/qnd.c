@@ -26,18 +26,20 @@ void usage()
 
 void parse_args(int argc, char **argv, struct qn_config *config)
 {
+  size_t arglen;
   for (int i = 1; i < argc; i++) {
     int lastarg = (i == argc-1);
-    if (!strcasecmp(argv[i], "--help")) {
+    arglen = strlen(argv[i]);
+    if (!strncasecmp(argv[i], "--help", arglen)) {
       usage();
-    } else if (!strcasecmp(argv[i],"--version")) {
+    } else if (!strncasecmp(argv[i], "--version", arglen)) {
       printf(QND_VERSION "\n");
       exit(EXIT_SUCCESS);
-    } else if (!strcasecmp(argv[i],"--host") && !lastarg) {
+    } else if (!strncasecmp(argv[i], "--host", arglen) && !lastarg) {
       config->host = argv[++i];
-    } else if (!strcasecmp(argv[i],"--port") && !lastarg) {
+    } else if (!strncasecmp(argv[i], "--port", arglen) && !lastarg) {
       config->port = argv[++i];
-    } else if (!strcasecmp(argv[i],"--heartbeat-interval") && !lastarg) {
+    } else if (!strncasecmp(argv[i], "--heartbeat-interval", arglen) && !lastarg) {
       config->heartbeat_interval = strtol(argv[++i], (char **)0, 10);
     } else {
       fprintf(stderr, "Unknown option: '%s'\n", argv[i]);
