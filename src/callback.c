@@ -51,30 +51,24 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     if (request == NULL) break;
     cli->srv->total_requests++;
 
-    // Parse requests based on first character for now
-    switch (request[0]) {
-      case 'h':
-        cli->wbuf = help_handler(cli);
-        break;
+    size_t reqlen = strlen(request);
+    char *delimiter = strnstr(request, " ", reqlen);
+    if (delimiter != NULL) {
+      reqlen = delimiter - request;
+    }
 
-      case 'p':
-        cli->wbuf = ping_handler(cli);
-        break;
-
-      case 't':
-        cli->wbuf = time_handler(cli);
-        break;
-
-      case 'i':
-        cli->wbuf = info_handler(cli);
-        break;
-
-      case 'q':
-        goto cleanup;
-
-      default:
-        cli->wbuf = sdscatprintf(cli->wbuf, "error=invalid command: %s\r\n\r\n", request);
-        break;
+    if (!strncasecmp(request, "help", reqlen)) {
+      cli->wbuf = help_handler(cli);
+    } else if (!strncasecmp(request, "ping", reqlen)) {
+      cli->wbuf = ping_handler(cli);
+    } else if (!strncasecmp(request, "time", reqlen)) {
+      cli->wbuf = time_handler(cli);
+    } else if (!strncasecmp(request, "info", reqlen)) {
+      cli->wbuf = info_handler(cli);
+    } else if (!strncasecmp(request, "quit", reqlen)) {
+      goto cleanup;
+    } else {
+      cli->wbuf = sdscatprintf(cli->wbuf, "error=invalid command: %s\r\n\r\n", request);
     }
 
     if (strstr(cli->wbuf, "\r\n\r\n") != NULL) {
