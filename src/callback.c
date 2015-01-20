@@ -52,7 +52,7 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     cli->srv->total_requests++;
 
     size_t reqlen = strlen(request);
-    char *delimiter = strnstr(request, " ", reqlen);
+    char *delimiter = strstr(request, " ");
     if (delimiter != NULL) {
       reqlen = delimiter - request;
     }
