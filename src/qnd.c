@@ -6,6 +6,7 @@ struct qn_server server;
 struct qn_config {
   char *host;
   char *port;
+  int backlog;
   int heartbeat_interval;
 };
 
@@ -54,6 +55,7 @@ int main(int argc, char **argv)
   struct qn_config config;
   config.host = DEFAULT_HOST;
   config.port = DEFAULT_PORT;
+  config.backlog = DEFAULT_BACKLOG;
   config.heartbeat_interval = DEFAULT_HEARTBEAT;
 
   parse_args(argc, argv, &config);
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
   struct ev_loop *loop = ev_default_loop(0);
 
   qn_server_init(&server);
-  if (qn_server_listen(&server, config.host, config.port) == -1) {
+  if (qn_server_listen(&server, config.host, config.port, config.backlog) == -1) {
     exit(EXIT_FAILURE);
   }
 

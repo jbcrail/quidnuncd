@@ -12,7 +12,7 @@ int qn_server_init(struct qn_server *svr)
   return 0;
 }
 
-int qn_server_listen(struct qn_server *svr, const char *host, const char *port)
+int qn_server_listen(struct qn_server *svr, const char *host, const char *port, int backlog)
 {
   int listenfd;
   const int option = 1;
@@ -54,7 +54,7 @@ int qn_server_listen(struct qn_server *svr, const char *host, const char *port)
     return -1;
   }
 
-  if (listen(listenfd, 2) < 0) {
+  if (listen(listenfd, backlog) < 0) {
     perror("listen");
     return -1;
   }

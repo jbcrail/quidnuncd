@@ -27,6 +27,7 @@
 #define DEFAULT_HEARTBEAT   5
 #define DEFAULT_HOST        "0.0.0.0"
 #define DEFAULT_PORT        "3230"
+#define DEFAULT_BACKLOG     10
 #define DEFAULT_BUFFER_SIZE 16*1024
 
 struct qn_server {
@@ -54,7 +55,7 @@ struct qn_client {
 };
 
 int qn_server_init(struct qn_server *svr);
-int qn_server_listen(struct qn_server *svr, const char *host, const char *port);
+int qn_server_listen(struct qn_server *svr, const char *host, const char *port, int backlog);
 void qn_server_cleanup(struct qn_server *svr);
 
 void qn_client_add(int fd);
