@@ -13,7 +13,6 @@ void qn_client_add(int fd)
     c->rbuf = sdsempty();
     c->wbuf = sdsempty();
     c->request = sdsempty();
-    c->response = sdsempty();
     c->srv = &server;
     HASH_ADD_INT(server.clients, fd, c);
   }
@@ -58,13 +57,8 @@ ssize_t qn_client_write(struct qn_client *c)
 {
   ssize_t total = 0;
 
-  while (1) {
-    char *pos = strstr(c->wbuf, "\r\n\r\n");
-    if (pos == NULL) break;
-
-    c->response = sdscpylen(c->response, c->wbuf, pos - c->wbuf + 4);
-
-    ssize_t bytes = send(c->fd, c->response, sdslen(c->response), 0);
+  while (sdslen(c->wbuf) > 0) {
+    ssize_t bytes = send(c->fd, c->wbuf, sdslen(c->wbuf), 0);
 
     if (bytes < 0) {
       perror("send error");
@@ -72,10 +66,7 @@ ssize_t qn_client_write(struct qn_client *c)
     }
 
     total += bytes;
-    if (bytes < sdslen(c->response)) break;
-
     sdsrange(c->wbuf, bytes, -1);
-    sdsclear(c->response);
   }
 
   return total;
@@ -84,7 +75,6 @@ ssize_t qn_client_write(struct qn_client *c)
 void qn_client_delete(struct qn_client *c)
 {
   c->srv = NULL;
-  sdsfree(c->response);
   sdsfree(c->request);
   sdsfree(c->wbuf);
   sdsfree(c->rbuf);

@@ -49,7 +49,6 @@ struct qn_client {
   sds rbuf;
   sds wbuf;
   sds request;
-  sds response;
   struct qn_server *srv;
   UT_hash_handle hh;
 };
