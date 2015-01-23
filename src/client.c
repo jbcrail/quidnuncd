@@ -2,7 +2,7 @@
 
 extern struct qn_server server;
 
-void qn_client_add(int fd)
+struct qn_client *qn_client_add(struct ev_loop *loop, int fd)
 {
   struct qn_client *c;
 
@@ -13,9 +13,13 @@ void qn_client_add(int fd)
     c->rbuf = sdsempty();
     c->wbuf = sdsempty();
     c->request = sdsempty();
+    c->loop = loop;
     c->srv = &server;
     HASH_ADD_INT(server.clients, fd, c);
+    c->srv->total_clients++;
+    c->srv->active_clients++;
   }
+  return c;
 }
 
 struct qn_client *qn_client_find(int fd)
@@ -42,42 +46,45 @@ sds qn_client_get_request(struct qn_client *c)
   return c->request;
 }
 
-ssize_t qn_client_read(struct qn_client *c)
+bool qn_client_read(struct qn_client *c)
 {
-  size_t oldlen = sdslen(c->rbuf);
   c->rbuf = sdsMakeRoomFor(c->rbuf, DEFAULT_BUFFER_SIZE);
-  ssize_t nread = recv(c->fd, c->rbuf+oldlen, DEFAULT_BUFFER_SIZE, 0);
-  if (nread > 0) {
-    sdsIncrLen(c->rbuf, nread);
+  ssize_t n = recv(c->fd, c->rbuf + strlen(c->rbuf), DEFAULT_BUFFER_SIZE, 0);
+  if (n > 0) {
+    sdsIncrLen(c->rbuf, n);
+  } else if (n < 0 && errno != EWOULDBLOCK && errno != EAGAIN) {
+    perror("recv error");
+    return false;
+  } else if (n == 0 && strlen(c->wbuf) == 0) {
+    /* Client socket was closed and there is no pending to write */
+    return false;
   }
-  return nread;
+  return true;
 }
 
-ssize_t qn_client_write(struct qn_client *c)
+bool qn_client_write(struct qn_client *c)
 {
-  ssize_t total = 0;
-
-  while (sdslen(c->wbuf) > 0) {
-    ssize_t bytes = send(c->fd, c->wbuf, sdslen(c->wbuf), 0);
-
-    if (bytes < 0) {
-      perror("send error");
-      break;
-    }
-
-    total += bytes;
-    sdsrange(c->wbuf, bytes, -1);
+  ssize_t n;
+  while ((n = send(c->fd, c->wbuf, strlen(c->wbuf), 0)) > 0) {
+    sdsrange(c->wbuf, n, -1);
   }
-
-  return total;
+  if (n < 0 && errno != EWOULDBLOCK && errno != EAGAIN) {
+    perror("send error");
+    return false;
+  }
+  return true;
 }
 
 void qn_client_delete(struct qn_client *c)
 {
+  c->srv->active_clients--;
   c->srv = NULL;
+  ev_io_stop(c->loop, &c->read_watcher);
+  ev_io_stop(c->loop, &c->write_watcher);
   sdsfree(c->request);
   sdsfree(c->wbuf);
   sdsfree(c->rbuf);
+  close(c->fd);
   HASH_DEL(server.clients, c);
   free(c);
 }

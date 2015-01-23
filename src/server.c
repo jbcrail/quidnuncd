@@ -14,6 +14,7 @@ int qn_server_init(struct qn_server *svr)
 
 int qn_server_listen(struct qn_server *svr, const char *host, const char *port, int backlog)
 {
+  int flags;
   int listenfd;
   const int option = 1;
   struct addrinfo hints, *res, *reshead;
@@ -37,8 +38,21 @@ int qn_server_listen(struct qn_server *svr, const char *host, const char *port, 
       continue;
     }
 
+    /* Reuse listening socket if possible */
     if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option)) < 0) {
       perror("setsockopt");
+      return -1;
+    }
+
+    /* Get defined flags for listening socket */
+    if ((flags = fcntl(listenfd, F_GETFL, 0)) < 0) {
+      perror("fcntl");
+      return -1;
+    }
+
+    /* Set listening socket as non-blocking */
+    if (fcntl(listenfd, F_SETFL, flags | O_NONBLOCK) < 0) {
+      perror("fcntl");
       return -1;
     }
 

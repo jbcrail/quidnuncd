@@ -18,13 +18,10 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  qn_client_add(client_sd);
-  server.total_clients++;
-  server.active_clients++;
-
-  struct ev_io *w_client = (struct ev_io*)malloc(sizeof(struct ev_io));
-  ev_io_init(w_client, read_cb, client_sd, EV_READ);
-  ev_io_start(loop, w_client);
+  struct qn_client *cli = qn_client_add(loop, client_sd);
+  ev_io_init(&cli->read_watcher, read_cb, client_sd, EV_READ);
+  ev_io_init(&cli->write_watcher, write_cb, client_sd, EV_WRITE);
+  ev_io_start(loop, &cli->read_watcher);
 }
 
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
@@ -35,15 +32,10 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   }
 
   struct qn_client *cli = qn_client_find(watcher->fd);
-  ssize_t bytes = qn_client_read(cli);
 
-  if (bytes < 0) {
-    perror("read error");
-    goto cleanup;
-  }
-
-  if (bytes == 0) {
-    goto cleanup;
+  if (!qn_client_read(cli)) {
+    qn_client_delete(cli);
+    return;
   }
 
   while (1) {
@@ -66,30 +58,16 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     } else if (!strncasecmp(request, "info", reqlen)) {
       cli->wbuf = info_handler(cli);
     } else if (!strncasecmp(request, "quit", reqlen)) {
-      goto cleanup;
+      qn_client_delete(cli);
+      return;
     } else {
       cli->wbuf = sdscatprintf(cli->wbuf, "error=invalid command: %s\r\n\r\n", request);
     }
-
-    if (strstr(cli->wbuf, "\r\n\r\n") != NULL) {
-      // TODO: set write callback to send all responses
-      bytes = qn_client_write(cli);
-      if (bytes < 0) {
-        perror("send error");
-        goto cleanup;
-      }
-    }
   }
 
-  return;
-
-cleanup:
-  ev_io_stop(loop, watcher);
-  free(watcher);
-
-  close(cli->fd);
-  qn_client_delete(cli);
-  server.active_clients--;
+  if (strlen(cli->wbuf) > 0) {
+    ev_io_start(loop, &cli->write_watcher);
+  }
 }
 
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
@@ -97,6 +75,17 @@ void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   // Ignore non-writeable events
   if ((revents | EV_WRITE) == 0) {
     return;
+  }
+
+  struct qn_client *cli = qn_client_find(watcher->fd);
+
+  if (!qn_client_write(cli)) {
+    qn_client_delete(cli);
+    return;
+  }
+
+  if (strlen(cli->wbuf) == 0) {
+    ev_io_stop(cli->loop, &cli->write_watcher);
   }
 }
 

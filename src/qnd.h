@@ -3,9 +3,11 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +51,9 @@ struct qn_client {
   sds rbuf;
   sds wbuf;
   sds request;
+  struct ev_loop *loop;
+  struct ev_io read_watcher;
+  struct ev_io write_watcher;
   struct qn_server *srv;
   UT_hash_handle hh;
 };
@@ -57,11 +62,11 @@ int qn_server_init(struct qn_server *svr);
 int qn_server_listen(struct qn_server *svr, const char *host, const char *port, int backlog);
 void qn_server_cleanup(struct qn_server *svr);
 
-void qn_client_add(int fd);
+struct qn_client *qn_client_add(struct ev_loop *loop, int fd);
 struct qn_client *qn_client_find(int fd);
 sds qn_client_get_request(struct qn_client *c);
-ssize_t qn_client_read(struct qn_client *c);
-ssize_t qn_client_write(struct qn_client *c);
+bool qn_client_read(struct qn_client *c);
+bool qn_client_write(struct qn_client *c);
 void qn_client_delete(struct qn_client *c);
 void qn_client_delete_all();
 
