@@ -18,7 +18,7 @@ void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     return;
   }
 
-  struct qn_client *cli = qn_client_add(loop, client_sd);
+  struct qn_client *cli = qn_client_new(loop, client_sd);
   ev_io_init(&cli->read_watcher, read_cb, client_sd, EV_READ);
   ev_io_init(&cli->write_watcher, write_cb, client_sd, EV_WRITE);
   ev_io_start(loop, &cli->read_watcher);

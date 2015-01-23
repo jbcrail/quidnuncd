@@ -2,7 +2,7 @@
 
 extern struct qn_server server;
 
-struct qn_client *qn_client_add(struct ev_loop *loop, int fd)
+struct qn_client *qn_client_new(struct ev_loop *loop, int fd)
 {
   struct qn_client *c;
 
