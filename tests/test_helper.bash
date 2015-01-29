@@ -57,7 +57,7 @@ assert_output_contains() {
     echo "assert_output_contains needs an argument" >&2
     return 1
   fi
-  echo "$output" | $(type -p ggrep grep | head -1) -F "$expected" >/dev/null || {
+  [[ "$output" = *"$expected"* ]] || {
     { echo "expected output to contain $expected"
       echo "actual: $output"
     } | flunk
