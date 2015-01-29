@@ -106,3 +106,6 @@ sed -e "${SUB_VARS}" deps/Makefile.in > deps/Makefile
 
 echo "creating src/Makefile"
 sed -e "${SUB_VARS}" src/Makefile.in > src/Makefile
+
+echo "creating tests/Makefile"
+sed -e "${SUB_VARS}" tests/Makefile.in > tests/Makefile

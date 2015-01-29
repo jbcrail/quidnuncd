@@ -1,0 +1,2 @@
+tests:
+	@QND=../src/qnd ../deps/target/bin/bats -t suite.bats

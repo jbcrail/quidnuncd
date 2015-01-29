@@ -5,16 +5,25 @@ AM_CFLAGS = @AM_CFLAGS@
 PREFIX = `pwd`/../target
 CFGFLAGS=--enable-static --disable-shared
 
+BATSVER=0.4.0
 SGVER=0.91
 EVVER=4.19
 
+BATS=target/bin/bats
 LIBEV=target/lib/libev.a
 LIBSTATGRAB=target/lib/libstatgrab.a
 
-all: $(LIBSTATGRAB) $(LIBEV)
+all: $(BATS) $(LIBSTATGRAB) $(LIBEV)
 
 MAKECOLOR="\033[32;1m"
 ENDCOLOR="\033[0m"
+
+$(BATS):
+	@printf '[%b]\n' $(MAKECOLOR)bats$(ENDCOLOR)
+	@$(WGET) -q -O bats-$(BATSVER).tar.gz https://github.com/sstephenson/bats/archive/v$(BATSVER).tar.gz
+	@$(TAR) -zxpf bats-$(BATSVER).tar.gz
+	@cd bats-$(BATSVER) && ./install.sh $(PREFIX)
+	@echo
 
 $(LIBSTATGRAB):
 	@printf '[%b]\n' $(MAKECOLOR)libstatgrab$(ENDCOLOR)

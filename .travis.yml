@@ -2,5 +2,4 @@ language: c
 before_script:
   - ./configure
 script:
-  - make clean
-  - make
+  - make && make tests
