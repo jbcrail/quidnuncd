@@ -60,7 +60,6 @@ int main(int argc, char **argv)
 
   parse_args(argc, argv, &config);
 
-  struct ev_signal signal_watcher;
   struct ev_io w_accept;
   ev_periodic heartbeat_timer;
   struct ev_loop *loop = ev_default_loop(0);
@@ -70,8 +69,15 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
-  ev_signal_start(loop, &signal_watcher);
+  // Watch for SIGINT
+  struct ev_signal sigint_watcher;
+  ev_signal_init(&sigint_watcher, shutdown_cb, SIGINT);
+  ev_signal_start(loop, &sigint_watcher);
+
+  // Watch for SIGTERM
+  struct ev_signal sigterm_watcher;
+  ev_signal_init(&sigterm_watcher, shutdown_cb, SIGTERM);
+  ev_signal_start(loop, &sigterm_watcher);
 
   ev_io_init(&w_accept, accept_cb, server.sd, EV_READ);
   ev_io_start(loop, &w_accept);
@@ -81,7 +87,9 @@ int main(int argc, char **argv)
 
   ev_loop(loop, 0);
 
-  ev_signal_stop(loop, &signal_watcher);
+  ev_signal_stop(loop, &sigterm_watcher);
+  ev_signal_stop(loop, &sigint_watcher);
+
   ev_io_stop(loop, &w_accept);
   qn_server_cleanup(&server);
   qn_client_delete_all();

@@ -73,7 +73,7 @@ void qn_client_delete_all();
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
-void sigint_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
+void shutdown_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents);
 void heartbeat_cb(struct ev_loop *loop, ev_periodic *w, int revents);
 
 sds help_handler(struct qn_client *c);

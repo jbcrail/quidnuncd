@@ -89,7 +89,7 @@ void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   }
 }
 
-void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents)
+void shutdown_cb(struct ev_loop *loop, ev_signal *w, int revents)
 {
   ev_break(loop, EVBREAK_ALL);
 }
