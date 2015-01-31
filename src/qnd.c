@@ -91,8 +91,8 @@ int main(int argc, char **argv)
   ev_signal_stop(loop, &sigint_watcher);
 
   ev_io_stop(loop, &w_accept);
-  qn_server_cleanup(&server);
   qn_client_delete_all();
+  qn_server_cleanup(&server);
 
   return 0;
 }
