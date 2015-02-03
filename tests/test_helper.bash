@@ -11,7 +11,7 @@ send_and_quit() {
   else
     cmd="$cmd\r\nquit\r\n"
   fi
-  run bash -c "printf '$cmd' | nc -C localhost $PORT | tr -d '\r'"
+  run bash -c "echo -e '$cmd' | nc -C localhost $PORT | tr -d '\r'"
 }
 
 teardown() {
