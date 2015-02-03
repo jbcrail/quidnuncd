@@ -40,7 +40,7 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
   while (1) {
     sds request = qn_client_get_request(cli);
-    if (request == NULL) break;
+    if (request == NULL || strlen(request) == 0) break;
     cli->srv->total_requests++;
 
     size_t reqlen = strlen(request);

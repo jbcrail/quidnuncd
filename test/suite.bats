@@ -79,3 +79,19 @@ EOF
   assert_success
   assert_output ""
 }
+
+@test "Server responds to unknown request" {
+  send_and_quit "42"
+  assert_output <<EOF
+error=invalid command: 42
+
+EOF
+}
+
+@test "Server responds to malformed request" {
+  send_and_quit "help\rinfo"
+  assert_output <<EOF
+error=invalid command: helpinfo
+
+EOF
+}
