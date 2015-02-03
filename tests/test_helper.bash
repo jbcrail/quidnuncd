@@ -7,9 +7,9 @@ setup() {
 send_and_quit() {
   local cmd="$1"
   if [ -z "$cmd" ]; then
-    cmd="quit\t"
+    cmd="quit\r\n"
   else
-    cmd="$cmd\r\nquit\r"
+    cmd="$cmd\r\nquit\r\n"
   fi
   run bash -c "printf '$cmd' | nc -C localhost $PORT | tr -d '\r'"
 }
