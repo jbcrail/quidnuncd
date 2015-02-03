@@ -8,5 +8,5 @@ clean:
 	@cd deps && $(MAKE) $@
 	@cd src && $(MAKE) $@
 
-tests: all
-	@cd tests && $(MAKE) $@
+test: all
+	@cd test && $(MAKE) $@
