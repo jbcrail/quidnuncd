@@ -10,6 +10,7 @@ struct qn_client *qn_client_new(struct ev_loop *loop, int fd)
   if (c == NULL) {
     c = (struct qn_client *)malloc(sizeof(struct qn_client));
     c->fd = fd;
+    c->eof = false;
     c->rbuf = sdsempty();
     c->wbuf = sdsempty();
     c->request = sdsempty();
@@ -75,16 +76,31 @@ bool qn_client_write(struct qn_client *c)
   return true;
 }
 
+// This method shuts down the receive-portion of the client connection.
+void qn_client_shutdown(struct qn_client *c)
+{
+  if (c->eof) {
+    return;
+  }
+
+  shutdown(c->fd, SHUT_RD);
+  ev_io_stop(c->loop, &c->read_watcher);
+  sdsfree(c->rbuf);
+  c->eof = true;
+}
+
 void qn_client_delete(struct qn_client *c)
 {
-  c->srv->active_clients--;
-  c->srv = NULL;
-  ev_io_stop(c->loop, &c->read_watcher);
+  qn_client_shutdown(c);
+
+  // Shut down the rest of the client connection
   ev_io_stop(c->loop, &c->write_watcher);
   sdsfree(c->request);
   sdsfree(c->wbuf);
-  sdsfree(c->rbuf);
   close(c->fd);
+
+  c->srv->active_clients--;
+  c->srv = NULL;
   HASH_DEL(server.clients, c);
   free(c);
 }

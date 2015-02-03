@@ -34,8 +34,8 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   struct qn_client *cli = qn_client_find(watcher->fd);
 
   if (!qn_client_read(cli)) {
-    qn_client_delete(cli);
-    return;
+    qn_client_shutdown(cli);
+    goto flush;
   }
 
   while (1) {
@@ -58,15 +58,18 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
     } else if (!strncasecmp(request, "info", reqlen)) {
       cli->wbuf = info_handler(cli);
     } else if (!strncasecmp(request, "quit", reqlen)) {
-      qn_client_delete(cli);
-      return;
+      qn_client_shutdown(cli);
+      goto flush;
     } else {
       cli->wbuf = sdscatprintf(cli->wbuf, "error=invalid command: %s\r\n\r\n", request);
     }
   }
 
+flush:
   if (strlen(cli->wbuf) > 0) {
     ev_io_start(loop, &cli->write_watcher);
+  } else {
+    qn_client_delete(cli);
   }
 }
 
@@ -85,7 +88,11 @@ void write_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
   }
 
   if (strlen(cli->wbuf) == 0) {
-    ev_io_stop(cli->loop, &cli->write_watcher);
+    if (cli->eof) {
+      qn_client_delete(cli);
+    } else {
+      ev_io_stop(cli->loop, &cli->write_watcher);
+    }
   }
 }
 

@@ -48,6 +48,7 @@ struct qn_server {
 
 struct qn_client {
   int fd;
+  bool eof;
   sds rbuf;
   sds wbuf;
   sds request;
@@ -67,6 +68,7 @@ struct qn_client *qn_client_find(int fd);
 sds qn_client_get_request(struct qn_client *c);
 bool qn_client_read(struct qn_client *c);
 bool qn_client_write(struct qn_client *c);
+void qn_client_shutdown(struct qn_client *c);
 void qn_client_delete(struct qn_client *c);
 void qn_client_delete_all();
 
