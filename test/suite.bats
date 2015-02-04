@@ -93,3 +93,15 @@ error=invalid command: helpinfo
 
 EOF
 }
+
+@test "Server responds to multiple 'ping' in one request" {
+  send_and_quit "ping\r\nping\r\nping"
+  assert_success <<EOF
+pong
+
+pong
+
+pong
+
+EOF
+}
