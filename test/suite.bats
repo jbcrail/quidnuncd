@@ -4,7 +4,7 @@ load test_helper
 
 @test "Server responds to 'help'" {
   send_and_quit "help"
-  assert_output <<EOF
+  assert_success <<EOF
 HELP
 INFO [fs|load|memory|network|page|stats|swap]
 PING
@@ -64,8 +64,7 @@ EOF
 
 @test "Server responds to 'ping'" {
   send_and_quit "ping"
-  assert_success
-  assert_output "pong"
+  assert_success "pong"
 }
 
 @test "Server responds to 'time'" {
@@ -77,12 +76,11 @@ EOF
 @test "Server responds to 'quit'" {
   send_and_quit
   assert_success
-  assert_output ""
 }
 
 @test "Server responds to unknown request" {
   send_and_quit "42"
-  assert_output <<EOF
+  assert_success <<EOF
 error=invalid command: 42
 
 EOF
@@ -90,7 +88,7 @@ EOF
 
 @test "Server responds to malformed request" {
   send_and_quit "help\rinfo"
-  assert_output <<EOF
+  assert_success <<EOF
 error=invalid command: helpinfo
 
 EOF
