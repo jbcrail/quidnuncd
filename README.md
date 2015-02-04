@@ -126,6 +126,8 @@ Architecture | Operating System        | Compiler
 
 ## Future work
 
+1. Add installation support.
+1. Build packages (.rpm, .deb, Solaris pkg).
 1. Add more tests using [minunit](https://github.com/siu/minunit).
 1. Add Riemann support (in-progress via [nano-riemann](https://github.com/jbcrail/nano-riemann)).
 1. Add sequence diagrams to documentation.
