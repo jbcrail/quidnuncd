@@ -1,6 +1,7 @@
 CC = @CC@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
+PREFIX = $(DESTDIR)/usr/local
 
 PROGRAM=qnd
 OBJS=qnd.o client.o server.o callback.o handler.o sds.o
@@ -14,3 +15,10 @@ $(PROGRAM): $(OBJS)
 
 clean:
 	@rm -rf $(OBJS) $(PROGRAM)
+
+install:
+	@mkdir -p $(PREFIX)/bin
+	@cp $(PROGRAM) $(PREFIX)/bin
+
+uninstall:
+	@rm -f $(PREFIX)/bin/$(PROGRAM)
