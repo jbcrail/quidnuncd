@@ -12,7 +12,7 @@ statistics about a server without needing a special client.
 Written only using ANSI C, Quidnuncd uses [libstatgrab](http://www.i-scream.org/libstatgrab/)
 and [libev](http://software.schmorp.de/pkg/libev.html). Both libraries work
 seamlessly on all systems that I need to support: Solaris 8+ (Sparc/x64),
-RHEL 5+, Ubuntu, OS X, and FreeBSD.
+RHEL 5+, Ubuntu, OS X, FreeBSD, and Raspbian.
 
 A trivial test on my 2014 MacBook Pro 2.8GHz Quad-core Intel i7 using 10 clients
 benchmarked an average 49K requests/sec. This is overkill for my typical usage,
@@ -123,6 +123,7 @@ Architecture | Operating System        | Compiler
 64-bit x86   | Solaris 10              | gcc 3.4.6
 32-bit Sparc | Solaris 8               | gcc 3.4.3
 64-bit x86   | FreeBSD 10.1            | clang 3.4.1
+32-bit ARM   | Raspbian                | gcc 4.6.3
 
 ## Future work
 
