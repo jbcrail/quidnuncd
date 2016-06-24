@@ -7,7 +7,7 @@ CFGFLAGS=--enable-static --disable-shared
 
 BATSVER=0.4.0
 SGVER=0.91
-EVVER=4.20
+EVVER=4.22
 
 BATS=target/bin/bats
 LIBEV=target/lib/libev.a
