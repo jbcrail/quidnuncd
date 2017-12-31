@@ -43,7 +43,7 @@ CFLAGS="-g -O2 -Wall -pedantic"
 
 case ${OS} in
     *linux*)
-        CFLAGS="${CFLAGS} -std=c99 -D_XOPEN_SOURCE"
+        CFLAGS="${CFLAGS} -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L"
         LDFLAGS="-lm -lpthread"
         ;;
 

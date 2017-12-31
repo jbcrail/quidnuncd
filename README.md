@@ -115,6 +115,7 @@ Quidnuncd was compiled and tested on the following OSes:
 Architecture | Operating System        | Compiler
 ------------ | ----------------------- | -----------------------
 64-bit x86   | RHEL 5                  | gcc 4.1.2
+64-bit x86   | Ubuntu 16.04            | gcc 5.4.0
 64-bit x86   | Ubuntu 14.10            | gcc 4.9.1
 32-bit x86   | Ubuntu 14.10            | gcc 4.8.2
 64-bit x86   | Ubuntu 12.04            | gcc 4.6.3
